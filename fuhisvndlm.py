@@ -55,8 +55,6 @@ class data(object):
 
 
 class Canvas(FigureCanvas):
-    """Ultimately, this is a QWidget (as well as a FigureCanvasAgg, etc.)."""
-
     def __init__(self, parent=None, width=5, height=4, dpi=100):
         fig = Figure(figsize=(width, height), dpi=dpi)
         self.fig = fig
@@ -71,43 +69,6 @@ class Canvas(FigureCanvas):
                                    QtWidgets.QSizePolicy.Expanding)
         FigureCanvas.updateGeometry(self)
 
-
-
-"""
-
-class DataCanvas(Canvas,data):    
-    def compute_initial_figure(self):
-        t = arange(0.0, 3.0, 0.01)
-        s = sin(2*pi*t)
-        self.axes.cla()
-        self.axes.plot(t, s)
-        self.axes.set_title('Data')
-    
-    def compute_figure(self, a):
-        t = arange(0.0, 3.0, 0.01)
-        s = sin(2*pi*t*a)
-        self.axes.clear()
-        self.axes.plot(t, s)
-        self.axes.set_title('Data')
-        self.fig.canvas.draw()
-        self.fig.canvas.flush_events()
-
-class ErrorsCanvas(Canvas,data):
-    def compute_initial_figure(self):
-        t = arange(0.0, 3.0, 0.01)
-        s = sin(2*pi*t)
-        self.axes.plot(t, s)
-        self.axes.set_title('Standard errors')
-
-    def compute_figure(self, k):
-        t = arange(0.0, 3.0, 0.01)
-        s = sin(2*pi*t*k)
-        self.axes.clear()
-        self.axes.plot(t, s)
-        self.axes.set_title('Standard errors')
-        self.fig.canvas.draw()
-        self.fig.canvas.flush_events()
-"""
 
 class ApplicationWindow(QtWidgets.QMainWindow):
     def __init__(self):
@@ -174,14 +135,7 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         JDHEL = JDHEL[a : -(b+1)]
         VC = VC[a : -(b+1)]
         timestamps = timestamps[a : -(b+1)]
-        dates = dates[a : -(b+1)]
-
-        #print([date.strftime("%b %d %Y %H:%M:%S") for date in dates])
-        #print(VC)
-        self.dataCanvas.axes.clear()
-        self.dataCanvas.axes.set_title("Data")
-        self.dataCanvas.axes.plot(timestamps, [float(d) for d in VC])
-        
+        dates = dates[a : -(b+1)]       
 
 
         # Compute resolution 
@@ -193,8 +147,17 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         print("Resolution : ", resolution, " samples per minute")
 
 
-        # Compute standard errors (use tunable parameter)
+        # Compute tunable time parameter
         nb_vals = int(self.k * resolution)
+        # VC = smooth(VC, int(nb_vals/10) if int(nb_vals/10)>0 else 1)
+
+        #print([date.strftime("%b %d %Y %H:%M:%S") for date in dates])
+        #print(VC)
+        self.dataCanvas.axes.clear()
+        self.dataCanvas.axes.set_title("Data")
+        self.dataCanvas.axes.plot(timestamps, [float(d) for d in VC])
+
+        # Compute standard errors (use tunable parameter)
         errors = []
         for i in range(len(VC)):
             #min_max = (i - nb_vals, i + nb_vals)
@@ -292,13 +255,13 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         
     def GroupResult(self):
         labelResult = QtWidgets.QLabel()
-        labelResult.setText('Some random text, it\'s here we \n gonna show our results \n \n')
+        labelResult.setText('Results : [nothing yet !] \n \n')
 
         labelInfosK = QtWidgets.QLabel()
-        labelInfosK.setText('change k coeff slider \n(note: coeff was calculated to be optimal)')
+        labelInfosK.setText('Change number of points for moving average (K coefficient) \n(note: coeff was calculated to be optimal)')
 
         labelInfosA = QtWidgets.QLabel()
-        labelInfosA.setText('change number of points for moving average \n(note: number of points was calculated to be optimal)')
+        labelInfosA.setText('Change boundary values from left and right')
 
 
         sliderK = QSlider(Qt.Horizontal)
