@@ -154,6 +154,9 @@ class ApplicationWindow(QtWidgets.QMainWindow):
             self.parseData()
 
     def parseData(self):
+        if not hasattr(self, "lines"):
+            return
+
         lines = self.lines
         header = lines[0]
         meta = lines[1]
@@ -165,6 +168,13 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         #HELCOR= data[header.index("HELCOR")]
         dates = [jiulian.from_jd(float(mjd), fmt='jd') for mjd in JDHEL]
         timestamps = [datetime.timestamp(i) for i in dates]
+
+        a = self.a 
+        b = self.b
+        JDHEL = JDHEL[a : -(b+1)]
+        VC = VC[a : -(b+1)]
+        timestamps = timestamps[a : -(b+1)]
+        dates = dates[a : -(b+1)]
 
         #print([date.strftime("%b %d %Y %H:%M:%S") for date in dates])
         #print(VC)
@@ -296,27 +306,28 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         sliderK.setTickPosition(QSlider.TicksBothSides)
         sliderK.setTickInterval(10)
         sliderK.setSingleStep(1)
-        sliderK.setValue(self.k)
+        sliderK.setMinimum(2)
         sliderK.valueChanged.connect(self.changeK)
         self.sk = sliderK
+        sliderK.setValue(8)
 
         sliderA = QSlider(Qt.Horizontal)
         sliderA.setFocusPolicy(Qt.StrongFocus)
         sliderA.setTickPosition(QSlider.TicksBothSides)
         sliderA.setTickInterval(10)
         sliderA.setSingleStep(1)
-        sliderA.setValue(self.a)
         sliderA.valueChanged.connect(self.changeA)
         self.sa = sliderA
+        sliderA.setValue(0)
 
         sliderB = QSlider(Qt.Horizontal)
         sliderB.setFocusPolicy(Qt.StrongFocus)
         sliderB.setTickPosition(QSlider.TicksBothSides)
         sliderB.setTickInterval(10)
         sliderB.setSingleStep(1)
-        sliderB.setValue(self.b)
         sliderB.valueChanged.connect(self.changeB)
         self.sb = sliderB
+        sliderB.setValue(0)
 
         groupBoxResult = QGroupBox('Results')
         vbox = QVBoxLayout()
@@ -349,7 +360,7 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         self.compute_figures()
 
     def compute_figures(self):
-        pass
+        self.parseData()
 
 qApp = QtWidgets.QApplication(sys.argv)
 
