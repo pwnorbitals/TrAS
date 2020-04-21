@@ -143,7 +143,8 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         VC = [-1 * float(d) for d in VC]
         #HELCOR= data[header.index("HELCOR")]
         dates = [jiulian.from_jd(float(mjd), fmt='jd') for mjd in JDHEL]
-        timestamps = [datetime.timestamp(i) for i in dates]
+        timestamps_orig = [datetime.timestamp(i) for i in dates]
+        timestamps = [i-timestamps_orig[0] for i in timestamps_orig]
 
         a = self.a 
         b = self.b
