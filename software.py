@@ -8,7 +8,7 @@ matplotlib.use('Qt5Agg')
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import (QWidget, QLabel, QLineEdit, 
-    QTextEdit, QGridLayout, QApplication, QGroupBox, QVBoxLayout, QWidget, QSlider, QFileDialog)
+    QTextEdit, QGridLayout, QApplication, QGroupBox, QVBoxLayout, QWidget, QSlider, QFileDialog, QDialog, QDialogButtonBox)
 
 from numpy import arange, sin, pi
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
@@ -42,6 +42,24 @@ def smooth(y, box_pts):
     y_smooth = np.convolve(y, box, mode='same')
     return y_smooth
 
+class CustomDialog(QDialog):
+    def __init__(self, *args, **kwargs):
+        super(CustomDialog, self).__init__(*args, **kwargs)
+        
+        self.setWindowTitle("About")
+        
+        QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
+        
+        self.buttonBox = QDialogButtonBox(QBtn)
+        self.buttonBox.accepted.connect(self.accept)
+        self.buttonBox.rejected.connect(self.reject)
+
+        self.label = QLabel("Built by Chris de CLAVERIE and Magdalena Calka !\nIPSA CIRI Exoplanet Transits 2020")
+
+        self.layout = QVBoxLayout()
+        self.layout.addWidget(self.label)
+        self.layout.addWidget(self.buttonBox)
+        self.setLayout(self.layout)
 
 
 class Canvas(FigureCanvas):
@@ -67,12 +85,15 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         self.setWindowTitle("application main window")
 
         self.file_menu = QtWidgets.QMenu('&File', self)
-        self.file_menu.addAction('&Quit', self.fileQuit,
-                                 QtCore.Qt.CTRL + QtCore.Qt.Key_Q)
         self.file_menu.addAction('&Open', self.OpenFile,
                                  QtCore.Qt.CTRL + QtCore.Qt.Key_N)
+        self.file_menu.addAction('&Quit', self.fileQuit,
+                                 QtCore.Qt.CTRL + QtCore.Qt.Key_Q)
         self.menuBar().addMenu(self.file_menu)
 
+        self.help_menu = QtWidgets.QMenu('&Help', self)
+        self.help_menu.addAction('&About', self.About)
+        self.menuBar().addMenu(self.help_menu)
 
         self.main_widget = QtWidgets.QWidget(self)
 
@@ -93,10 +114,14 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         self.a = 0
         self.b = 0
         
+    def About(self):
+        dlg = CustomDialog(self)
+        dlg.exec_()
 
     def OpenFile(self):
         file = QFileDialog.getOpenFileName(self, 'Open File')
         if file[0]:
+            aw.setWindowTitle("%s [%s]" % (progname, file[0]))
             # Parse file
             file = open(file[0], 'r')
             lines = file.readlines()
@@ -317,17 +342,10 @@ class ApplicationWindow(QtWidgets.QMainWindow):
 
 qApp = QtWidgets.QApplication(sys.argv)
 
-
-
-datax = [random.random() for i in range(25)]
-datay = [random.random() for i in range(25)]
-
-
 aw = ApplicationWindow()
 aw.setWindowTitle("%s" % progname)
 aw.show()
 sys.exit(qApp.exec_())
-#qApp.exec_()
 
 datax = [random.random() for i in range(25)]
 datay = [random.random() for i in range(25)]
