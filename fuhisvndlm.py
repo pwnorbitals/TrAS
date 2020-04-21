@@ -46,6 +46,7 @@ class Canvas(FigureCanvas):
 
     def __init__(self, parent=None, width=5, height=4, dpi=100):
         fig = Figure(figsize=(width, height), dpi=dpi)
+        self.fig = fig
         self.axes = fig.add_subplot(111)
         super(Canvas, self).__init__(fig)
 
@@ -68,8 +69,18 @@ class RawDataCanvas(Canvas,data):
     def compute_initial_figure(self):
         t = arange(0.0, 3.0, 0.01)
         s = sin(2*pi*t)
+        self.axes.cla()
         self.axes.plot(t, s)
         self.axes.set_title('Raw data')
+    
+    def compute_figure(self, a):
+        t = arange(0.0, 3.0, 0.01)
+        s = sin(2*pi*t*a)
+        self.axes.clear()
+        self.axes.plot(t, s)
+        self.axes.set_title('Raw data')
+        self.fig.canvas.draw()
+        self.fig.canvas.flush_events()
 
 class ProcessDataCanvas(Canvas,data):
 
@@ -79,6 +90,14 @@ class ProcessDataCanvas(Canvas,data):
         self.axes.plot(t, s)
         self.axes.set_title('Process data')
 
+    def compute_figure(self, k):
+        t = arange(0.0, 3.0, 0.01)
+        s = sin(2*pi*t*k)
+        self.axes.clear()
+        self.axes.plot(t, s)
+        self.axes.set_title('Process data')
+        self.fig.canvas.draw()
+        self.fig.canvas.flush_events()
 
 
 class ApplicationWindow(QtWidgets.QMainWindow):
@@ -125,7 +144,9 @@ class ApplicationWindow(QtWidgets.QMainWindow):
     def GroupGraph(self):
          #graphics and toolbars        
         Rd = RawDataCanvas(self.main_widget, width=5, height=5, dpi=100)
+        self.rd = Rd
         Cd = ProcessDataCanvas(self.main_widget, width=5, height=5, dpi=100)
+        self.cd = Cd
         toolbarRd = NavigationToolbar(Rd, self)
         toolbarCd = NavigationToolbar(Cd, self)
 
@@ -156,12 +177,16 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         sliderK.setTickPosition(QSlider.TicksBothSides)
         sliderK.setTickInterval(10)
         sliderK.setSingleStep(1)
+        sliderK.valueChanged.connect(self.changeK)
+        self.sk = sliderK
 
         sliderA = QSlider(Qt.Horizontal)
         sliderA.setFocusPolicy(Qt.StrongFocus)
         sliderA.setTickPosition(QSlider.TicksBothSides)
         sliderA.setTickInterval(10)
         sliderA.setSingleStep(1)
+        sliderA.valueChanged.connect(self.changeA)
+        self.sa = sliderA
 
         groupBoxResult = QGroupBox('Results')
         vbox = QVBoxLayout()
@@ -180,8 +205,11 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         self.close()
 
 
+    def changeA(self, a_in):
+        self.rd.compute_figure(self.sa.value())
 
-
+    def changeK(self, k_in):
+        self.cd.compute_figure(self.sk.value())
 
 qApp = QtWidgets.QApplication(sys.argv)
 
