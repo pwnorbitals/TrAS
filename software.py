@@ -38,8 +38,8 @@ def getVal(i, arr) :
     else:
         return arr[i]
 
-def smooth(list, param):
-    return gaussian_filter1d(list, param)
+def smooth(inlist, param):
+    return gaussian_filter1d(inlist, param)
 
 class CustomDialog(QDialog):
     def __init__(self, *args, **kwargs):
@@ -283,10 +283,10 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         sliderS.setTickPosition(QSlider.TicksBothSides)
         sliderS.setTickInterval(10)
         sliderS.setSingleStep(1)
-        sliderS.setMinimum(2)
+        sliderS.setMinimum(1)
         sliderS.valueChanged.connect(self.changeS)
         self.ss = sliderS
-        sliderS.setValue(8)
+        sliderS.setValue(2)
 
         sliderK = QSlider(Qt.Horizontal)
         sliderK.setFocusPolicy(Qt.StrongFocus)
