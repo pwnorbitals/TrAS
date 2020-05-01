@@ -23,6 +23,8 @@ from datetime import datetime
 from matplotlib.widgets import Slider
 from math import floor
 
+from scipy.ndimage import gaussian_filter1d
+
 jiulian = __import__("jiulian")
 
 progname = os.path.basename(sys.argv[0])
@@ -36,11 +38,8 @@ def getVal(i, arr) :
     else:
         return arr[i]
 
-
-def smooth(y, box_pts):
-    box = np.ones(box_pts)/box_pts
-    y_smooth = np.convolve(y, box, mode='same')
-    return y_smooth
+def smooth(list, param):
+    return gaussian_filter1d(list, param)
 
 class CustomDialog(QDialog):
     def __init__(self, *args, **kwargs):
@@ -86,7 +85,7 @@ class ApplicationWindow(QtWidgets.QMainWindow):
 
         self.file_menu = QtWidgets.QMenu('&File', self)
         self.file_menu.addAction('&Open', self.OpenFile,
-                                 QtCore.Qt.CTRL + QtCore.Qt.Key_N)
+                                 QtCore.Qt.CTRL + QtCore.Qt.Key_O)
         self.file_menu.addAction('&Quit', self.fileQuit,
                                  QtCore.Qt.CTRL + QtCore.Qt.Key_Q)
         self.menuBar().addMenu(self.file_menu)
@@ -165,7 +164,7 @@ class ApplicationWindow(QtWidgets.QMainWindow):
 
         # Compute tunable time parameter
         nb_vals = int(self.k * resolution)
-        # VC = smooth(VC, int(nb_vals/10) if int(nb_vals/10)>0 else 1)
+        VC = smooth(VC, self.s)
 
         #print([date.strftime("%b %d %Y %H:%M:%S") for date in dates])
         #print(VC)
@@ -279,6 +278,15 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         labelInfosA = QtWidgets.QLabel()
         labelInfosA.setText('Change boundary values from left and right')
 
+        sliderS = QSlider(Qt.Horizontal)
+        sliderS.setFocusPolicy(Qt.StrongFocus)
+        sliderS.setTickPosition(QSlider.TicksBothSides)
+        sliderS.setTickInterval(10)
+        sliderS.setSingleStep(1)
+        sliderS.setMinimum(2)
+        sliderS.valueChanged.connect(self.changeS)
+        self.ss = sliderS
+        sliderS.setValue(8)
 
         sliderK = QSlider(Qt.Horizontal)
         sliderK.setFocusPolicy(Qt.StrongFocus)
@@ -313,6 +321,7 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         vbox.addWidget(labelResult)
         vbox.addWidget(labelInfosK)
         vbox.addWidget(sliderK)
+        vbox.addWidget(sliderS)
         vbox.addWidget(labelInfosA)
         vbox.addWidget(sliderA)
         vbox.addWidget(sliderB)
@@ -325,6 +334,9 @@ class ApplicationWindow(QtWidgets.QMainWindow):
     def fileQuit(self):
         self.close()
 
+    def changeS(self):
+        self.s = self.ss.value()
+        self.compute_figures()
 
     def changeA(self):
         self.a = self.sa.value()
