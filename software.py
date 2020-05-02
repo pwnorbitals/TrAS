@@ -78,8 +78,6 @@ def Param(R_star, Period, time, k_ps, Y):
     """
     # Light curve data
     T_t, T_f = Find_tftt(time, k_ps, Y)
-    print(T_t)
-    print(T_f)
     Depth = abs(max(Y) - min(Y))
 
     # Depth or Delta F
@@ -108,7 +106,6 @@ def Semimajor(R_star, sinT_t, Depth, b):
     Depth (or Delta Flux), impact parameter b
     """
     A = np.float_power((1 + np.sqrt(Depth)), 2)
-    Km_to_ua = 6.684589* np.float_power(10, -9)
     a = R_star * np.sqrt((A - (1-sinT_t)*np.float_power(b, 2)) / (sinT_t))
     return a
 
@@ -379,7 +376,7 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         self.StarLabel.setText(star)
         self.Other.setText(other)
 
-        self.labelInfosK.setText('Change the K coefficient : %i \n(note: coeff was calculated to be optimal)' % self.sk.value())
+        self.labelInfosK.setText('Change the K coefficient : %i  (note: coeff was calculated to be optimal)' % self.sk.value())
         self.labelInfosS.setText('Change the s coefficient : %i' % self.ss.value())
 
 
@@ -414,12 +411,16 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         self.StarLabel = QLabel('Star density : \nStar mass : ')
         self.Other = QLabel('Impact parameter b : \nSemimajor axis a : \n Inclinaison : ')
 
-        self.labelInfosK = QLabel('Change the K coefficient :\n(note: coeff was calculated to be optimal)')
+        self.labelInfosK = QLabel('Change the K coefficient :  (note: coeff was calculated to be optimal)')
 
         self.labelInfosS = QLabel('Change the s coefficient : ')
 
         labelInfosA = QtWidgets.QLabel()
         labelInfosA.setText('Change boundary values from left and right :')
+
+        tuto1 = "The K coefficient characterize the time's interval used for error calculation.\nIncrease K implies less approximation segments."
+        tuto2 = "\n\nThe s coefficient is the number of samples used to smooth the data."
+        labeltuto = QLabel(tuto1+tuto2)
 
         self.validator = QDoubleValidator()
         self.RS_input = QLineEdit()
@@ -494,6 +495,7 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         vbox.addWidget(sliderS)
         vbox.addWidget(labelInfosA)
         vbox.addLayout(hbox)
+        vbox.addWidget(labeltuto)
         vbox.addStretch(1)
         groupBoxResult.setLayout(vbox)       
         
