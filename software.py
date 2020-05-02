@@ -379,6 +379,9 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         self.StarLabel.setText(star)
         self.Other.setText(other)
 
+        self.labelInfosK.setText('Change the K coefficient : %i \n(note: coeff was calculated to be optimal)' % self.sk.value())
+        self.labelInfosS.setText('Change the s coefficient : %i' % self.ss.value())
+
 
     def GroupGraph(self):
          #graphics and toolbars        
@@ -411,11 +414,12 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         self.StarLabel = QLabel('Star density : \nStar mass : ')
         self.Other = QLabel('Impact parameter b : \nSemimajor axis a : \n Inclinaison : ')
 
-        labelInfosK = QtWidgets.QLabel()
-        labelInfosK.setText('Change number of points for moving average (K coefficient) \n(note: coeff was calculated to be optimal)')
+        self.labelInfosK = QLabel('Change the K coefficient :\n(note: coeff was calculated to be optimal)')
+
+        self.labelInfosS = QLabel('Change the s coefficient : ')
 
         labelInfosA = QtWidgets.QLabel()
-        labelInfosA.setText('Change boundary values from left and right')
+        labelInfosA.setText('Change boundary values from left and right :')
 
         self.validator = QDoubleValidator()
         self.RS_input = QLineEdit()
@@ -461,8 +465,13 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         sliderB.setTickInterval(10)
         sliderB.setSingleStep(1)
         sliderB.valueChanged.connect(self.changeB)
+        sliderB.setInvertedAppearance(True)
         self.sb = sliderB
         sliderB.setValue(0)
+
+        hbox = QtWidgets.QHBoxLayout()
+        hbox.addWidget(sliderA)
+        hbox.addWidget(sliderB)
 
         GridResult = QGridLayout()
         #User Input
@@ -474,17 +483,17 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         #Deduced Parameter
         GridResult.addWidget(self.PlanetLabel, 2,0)
         GridResult.addWidget(self.StarLabel, 3,0)
-        GridResult.addWidget(self.Other, 3,1)
+        GridResult.addWidget(self.Other, 2,1)
 
         groupBoxResult = QGroupBox('Results')
         vbox = QVBoxLayout()
         vbox.addLayout(GridResult)
-        vbox.addWidget(labelInfosK)
+        vbox.addWidget(self.labelInfosK)
         vbox.addWidget(sliderK)
+        vbox.addWidget(self.labelInfosS)
         vbox.addWidget(sliderS)
         vbox.addWidget(labelInfosA)
-        vbox.addWidget(sliderA)
-        vbox.addWidget(sliderB)
+        vbox.addLayout(hbox)
         vbox.addStretch(1)
         groupBoxResult.setLayout(vbox)       
         
