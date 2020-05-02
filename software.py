@@ -9,6 +9,7 @@ from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import (QWidget, QLabel, QLineEdit, 
     QTextEdit, QGridLayout, QApplication, QGroupBox, QVBoxLayout, QWidget, QSlider, QFileDialog, QDialog, QDialogButtonBox)
+from PyQt5.QtGui import QDoubleValidator
 
 from numpy import arange, sin, pi
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
@@ -40,6 +41,106 @@ def getVal(i, arr) :
 
 def smooth(inlist, param):
     return gaussian_filter1d(inlist, param)
+
+def Find_tftt(T, kp, Y):
+    mean = sum(Y)/len(Y)
+    Up = []
+    Down = []
+
+    for i in range(len(Y)):
+        if (Y[i] < mean):
+            Down.append(i)
+        else:
+            Up.append(i)
+    
+    if len(Down)<2:
+        T_f = 0
+    else:
+        T_f = T[kp[Down[-1]]] - T[kp[Down[0]]]
+    
+    k=0
+    for i in range(len(Up)):
+        if Up[i] > Down[-1]:
+            k = i
+
+    if k==0:
+        T_t = T[-1] - T[kp[Up[-1]]]
+    else:
+        T_t = T[kp[Up[k]]] - T[kp[Up[k-1]]]
+    
+    return T_t, T_f
+
+
+def Param(R_star, Period, time, k_ps, Y):
+    """
+    Input : Radius of the star, Period in seconds,
+    timestamp in seconds, kept_peaks, magnitude
+    """
+    # Light curve data
+    T_t, T_f = Find_tftt(time, k_ps, Y)
+    print(T_t)
+    print(T_f)
+    Depth = abs(max(Y) - min(Y))
+
+    # Depth or Delta F
+    #Depth = 1 - abs(MinMag)
+
+    # Impact parameter b
+    sinT_t = np.float_power( np.sin(T_t * np.pi/Period), 2) 
+    sinT_f = np.float_power( np.sin(T_f * np.pi/Period), 2)
+
+    return Depth, sinT_t, sinT_f
+
+def Impact_parameter(sinT_t, sinT_f, Depth):
+    """
+    Input : sin^2(T_t*pi/Period), sin^2(T_f*pi/Period),
+    Depth
+    """
+    A = np.float_power((1 + np.sqrt(Depth)), 2)
+    B = np.float_power((1 - np.sqrt(Depth)), 2)
+
+    b = np.sqrt((B - sinT_f*A/sinT_t) / (1 - sinT_f/sinT_t))
+    return b
+
+def Semimajor(R_star, sinT_t, Depth, b):
+    """
+    Input : Radius of the star, sin^2(T_t*pi/Period),
+    Depth (or Delta Flux), impact parameter b
+    """
+    A = np.float_power((1 + np.sqrt(Depth)), 2)
+    Km_to_ua = 6.684589* np.float_power(10, -9)
+    a = R_star * np.sqrt((A - (1-sinT_t)*np.float_power(b, 2)) / (sinT_t))
+    return a
+
+def Inclinaison(R_star, a, b):
+    """
+    Input : Radius of the star, semi-major axis a,
+    impact parameter b
+    """
+    i = np.arccos(R_star*b/a)
+    return i*180/np.pi
+
+def Planet_radius(R_star, Depth):
+    Rp = R_star*np.sqrt(Depth)
+    return Rp
+
+def Star_density(Depth, b, sinT_t, Period):
+    G = 6.67430 * np.float_power(10, -17)
+    A = np.float_power((1 + np.sqrt(Depth)), 2)
+    x1 = (4* np.float_power(np.pi, 2) )/(G* np.float_power(Period, 2))
+    x2 = (A-np.float_power(b, 2)*(1-sinT_t)) / sinT_t
+
+    rho_star = x1 * np.float_power(x2, 3/2)
+    return rho_star
+
+def Star_mass(R_star, rho_star):
+    M_star = (4/3) * np.pi * rho_star * np.float_power(R_star, 3)
+    return M_star
+
+def Planet_mass(M_star, Period, a):
+    G = 6.67430 * np.float_power(10, -17)
+    M_planet = abs((4 * np.float_power(np.pi, 2) * np.float_power(a, 3))/(G * np.float_power(Period, 2)) - M_star)
+    return M_planet
 
 class CustomDialog(QDialog):
     def __init__(self, *args, **kwargs):
@@ -112,6 +213,9 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         self.k = 8
         self.a = 0
         self.b = 0
+
+        self.Star_Radius = 1.0
+        self.Period = 1.0
         
     def About(self):
         dlg = CustomDialog(self)
@@ -213,7 +317,8 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         kept_peaks = sorted(kept_peaks)
         print("KEPT PEAKS : ", kept_peaks)
         
-
+        # Add list mag to get the begin of each approximation
+        mag = []
         for i in range(len(kept_peaks)):
 
             # subdivide interval
@@ -238,6 +343,7 @@ class ApplicationWindow(QtWidgets.QMainWindow):
             #self.dataCanvas.axes.plot(y, xvals)
             self.dataCanvas.axes.plot(xvals, yvals)
             #print(fits)
+            mag.append(yvals[0])
 
         self.errorCanvas.fig.canvas.draw()
         self.errorCanvas.fig.canvas.flush_events()
@@ -246,6 +352,32 @@ class ApplicationWindow(QtWidgets.QMainWindow):
 
 
             # Deduce parameters
+        R_s = self.Star_Radius
+        Period = self.Period
+        
+        Depth, sintt, sintf = Param(R_s, Period, timestamps, kept_peaks, mag)
+
+        imp_b = Impact_parameter(sintt, sintf, Depth)
+
+        Semi_a = Semimajor(R_s, sintt, Depth, imp_b)
+
+        alpha = Inclinaison(R_s, Semi_a, imp_b)
+
+        R_p = Planet_radius(R_s, Depth)
+
+        Star_d = Star_density(Depth, imp_b, sintt, Period)
+
+        M_star = Star_mass(R_s, Star_d)
+
+        M_planet = Planet_mass(M_star, Period, Semi_a)
+
+        planet = "Planet radius : %.5E (km)" % R_p + "\nPlanet mass : %.3E (kg)" % M_planet
+        star = "Star density : %.5E" % Star_d + "\nStar mass : %.3E (kg)" % M_star
+        other = "Impact parameter b : %.5E" % imp_b + "\nSemi-major a : %.5E (km)" % Semi_a + "\nInclinaison : %.3f °" % alpha
+
+        self.PlanetLabel.setText(planet)
+        self.StarLabel.setText(star)
+        self.Other.setText(other)
 
 
     def GroupGraph(self):
@@ -269,14 +401,30 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         return groupBoxGraph
         
     def GroupResult(self):
-        labelResult = QtWidgets.QLabel()
-        labelResult.setText('Results : [nothing yet !] \n \n')
+        labelRadius = QtWidgets.QLabel()
+        labelRadius.setText("Enter the Star's radius (kilometers):")
+
+        labelPeriod = QtWidgets.QLabel()
+        labelPeriod.setText("Enter the Period of orbit (seconds):")
+
+        self.PlanetLabel = QLabel('Planet radius : \nPlanet mass : ')
+        self.StarLabel = QLabel('Star density : \nStar mass : ')
+        self.Other = QLabel('Impact parameter b : \nSemimajor axis a : \n Inclinaison : ')
 
         labelInfosK = QtWidgets.QLabel()
         labelInfosK.setText('Change number of points for moving average (K coefficient) \n(note: coeff was calculated to be optimal)')
 
         labelInfosA = QtWidgets.QLabel()
         labelInfosA.setText('Change boundary values from left and right')
+
+        self.validator = QDoubleValidator()
+        self.RS_input = QLineEdit()
+        self.RS_input.setValidator(self.validator)
+        self.RS_input.returnPressed.connect(self.RadiusChanged)
+        
+        self.Per_input = QLineEdit()
+        self.Per_input.setValidator(self.validator)
+        self.Per_input.returnPressed.connect(self.PeriodChanged)
 
         sliderS = QSlider(Qt.Horizontal)
         sliderS.setFocusPolicy(Qt.StrongFocus)
@@ -316,9 +464,21 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         self.sb = sliderB
         sliderB.setValue(0)
 
+        GridResult = QGridLayout()
+        #User Input
+        GridResult.addWidget(labelRadius, 0,0)
+        GridResult.addWidget(self.RS_input, 1,0)
+        GridResult.addWidget(labelPeriod, 0,1)
+        GridResult.addWidget(self.Per_input, 1,1)
+        
+        #Deduced Parameter
+        GridResult.addWidget(self.PlanetLabel, 2,0)
+        GridResult.addWidget(self.StarLabel, 3,0)
+        GridResult.addWidget(self.Other, 3,1)
+
         groupBoxResult = QGroupBox('Results')
         vbox = QVBoxLayout()
-        vbox.addWidget(labelResult)
+        vbox.addLayout(GridResult)
         vbox.addWidget(labelInfosK)
         vbox.addWidget(sliderK)
         vbox.addWidget(sliderS)
@@ -333,6 +493,14 @@ class ApplicationWindow(QtWidgets.QMainWindow):
 
     def fileQuit(self):
         self.close()
+
+    def RadiusChanged(self):
+        self.Star_Radius = float(self.RS_input.text())
+        self.compute_figures()
+
+    def PeriodChanged(self):
+        self.Period = float(self.Per_input.text())
+        self.compute_figures()
 
     def changeS(self):
         self.s = self.ss.value()
