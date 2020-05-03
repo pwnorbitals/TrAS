@@ -44,30 +44,27 @@ def smooth(inlist, param):
 
 def Find_tftt(T, kp, Y):
     mean = sum(Y)/len(Y)
-    Up = []
-    Down = []
+    Up_1 = 0
+    Down_1 = 0
+    Up_2 = 0
+    Down_2 = 0
 
     for i in range(len(Y)):
-        if (Y[i] < mean):
-            Down.append(i)
+        if (Y[i] < mean and Down_1 == 0):
+            Down_1 = T[kp[i]]
+        elif (Y[i] < mean and Down_1 != 0):
+            Down_2 = T[kp[i]]
         else:
-            Up.append(i)
+            if (Down_1 == 0):
+                Up_1 = T[kp[i]]
+            elif(Down_2 != 0 and Up_2 == 0):
+                Up_2 = T[kp[i]]
     
-    if len(Down)<2:
+    T_t = Up_2 - Up_1
+    if Down_2 == 0:
         T_f = 0
     else:
-        T_f = T[kp[Down[-1]]] - T[kp[Down[0]]]
-    
-    k=0
-    for i in range(len(Up)):
-        if Up[i] > Down[-1]:
-            k = i
-
-    if k==0:
-        T_t = T[-1] - T[kp[Up[-1]]]
-    else:
-        T_t = T[kp[Up[k]]] - T[kp[Up[k-1]]]
-    
+        T_f = Down_2 - Down_1
     return T_t, T_f
 
 
@@ -79,10 +76,8 @@ def Param(R_star, Period, time, k_ps, Y):
     # Light curve data
     T_t, T_f = Find_tftt(time, k_ps, Y)
     Depth = abs(max(Y) - min(Y))
-
-    # Depth or Delta F
-    #Depth = 1 - abs(MinMag)
-
+    print("\t",T_t)
+    print("\t",T_f)
     # Impact parameter b
     sinT_t = np.float_power( np.sin(T_t * np.pi/Period), 2) 
     sinT_f = np.float_power( np.sin(T_f * np.pi/Period), 2)
@@ -96,8 +91,9 @@ def Impact_parameter(sinT_t, sinT_f, Depth):
     """
     A = np.float_power((1 + np.sqrt(Depth)), 2)
     B = np.float_power((1 - np.sqrt(Depth)), 2)
-
-    b = np.sqrt((B - sinT_f*A/sinT_t) / (1 - sinT_f/sinT_t))
+    print(sinT_t)
+    print(sinT_f)
+    b = np.sqrt(abs(B - sinT_f*A/sinT_t) / (1 - sinT_f/sinT_t))
     return b
 
 def Semimajor(R_star, sinT_t, Depth, b):
@@ -106,7 +102,7 @@ def Semimajor(R_star, sinT_t, Depth, b):
     Depth (or Delta Flux), impact parameter b
     """
     A = np.float_power((1 + np.sqrt(Depth)), 2)
-    a = R_star * np.sqrt((A - (1-sinT_t)*np.float_power(b, 2)) / (sinT_t))
+    a = R_star * np.sqrt(abs(A - (1-sinT_t)*np.float_power(b, 2)) / (sinT_t))
     return a
 
 def Inclinaison(R_star, a, b):
@@ -315,6 +311,7 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         print("KEPT PEAKS : ", kept_peaks)
         
         # Add list mag to get the begin of each approximation
+        boundaries = []
         mag = []
         for i in range(len(kept_peaks)):
 
@@ -340,7 +337,8 @@ class ApplicationWindow(QtWidgets.QMainWindow):
             #self.dataCanvas.axes.plot(y, xvals)
             self.dataCanvas.axes.plot(xvals, yvals)
             #print(fits)
-            mag.append(yvals[0])
+            mag.extend([yvals[0], yvals[-1]])
+            boundaries.extend([min_of_range, max_of_range-1])
 
         self.errorCanvas.fig.canvas.draw()
         self.errorCanvas.fig.canvas.flush_events()
@@ -352,7 +350,7 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         R_s = self.Star_Radius
         Period = self.Period
         
-        Depth, sintt, sintf = Param(R_s, Period, timestamps, kept_peaks, mag)
+        Depth, sintt, sintf = Param(R_s, Period, timestamps, boundaries, mag)
 
         imp_b = Impact_parameter(sintt, sintf, Depth)
 
