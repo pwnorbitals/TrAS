@@ -349,21 +349,13 @@ class ApplicationWindow(QtWidgets.QMainWindow):
             # Deduce parameters
         R_s = self.Star_Radius
         Period = self.Period
-        
         Depth, sintt, sintf = Param(R_s, Period, timestamps, boundaries, mag)
-
         imp_b = Impact_parameter(sintt, sintf, Depth)
-
         Semi_a = Semimajor(R_s, sintt, Depth, imp_b)
-
         alpha = Inclinaison(R_s, Semi_a, imp_b)
-
         R_p = Planet_radius(R_s, Depth)
-
         Star_d = Star_density(Depth, imp_b, sintt, Period)
-
         M_star = Star_mass(R_s, Star_d)
-
         M_planet = Planet_mass(M_star, Period, Semi_a)
 
         planet = "Planet radius : %.5E (km)" % R_p + "\nPlanet mass : %.3E (kg)" % M_planet
