@@ -159,7 +159,7 @@ class CustomDialog(QDialog):
         self.buttonBox.accepted.connect(self.accept)
         self.buttonBox.rejected.connect(self.reject)
 
-        self.label = QLabel("Built by Chris de CLAVERIE and Magdalena Calka !\nIPSA CIRI Exoplanet Transits 2020")
+        self.label = QLabel("Built by Chris de CLAVERIE, Magdalena CALKA and William BOITIER!\nIPSA CIRI Exoplanet Transits 2020")
 
         self.layout = QVBoxLayout()
         self.layout.addWidget(self.label)
@@ -203,7 +203,7 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         self.main_widget = QtWidgets.QWidget(self)
 
         
-        self.setGeometry(50, 50, 800, 800)
+        self.setGeometry(50, 50, 1200, 800)
         self.setWindowTitle('Review')    
         
 
