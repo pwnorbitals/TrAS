@@ -3,12 +3,16 @@ import sys
 import os
 import random
 import matplotlib
+import pyvo
 matplotlib.use('Qt5Agg')
 
+
+from PyQt5.QtSql import QSqlTableModel
 from PyQt5 import QtCore, QtWidgets
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, pyqtSlot
 from PyQt5.QtWidgets import (QWidget, QLabel, QLineEdit, 
-    QTextEdit, QGridLayout, QApplication, QGroupBox, QVBoxLayout, QWidget, QSlider, QFileDialog, QDialog, QDialogButtonBox)
+    QTextEdit, QGridLayout, QApplication, QGroupBox, QVBoxLayout, QWidget, QSlider, QFileDialog, QDialog, QDialogButtonBox,
+    QTableView, QComboBox, QPushButton)
 from PyQt5.QtGui import QDoubleValidator
 
 from numpy import arange, sin, pi
@@ -26,9 +30,17 @@ from math import floor
 
 from scipy.ndimage import gaussian_filter1d
 
-jiulian = __import__("jiulian")
 
+
+jiulian = __import__("jiulian")
 progname = os.path.basename(sys.argv[0])
+service = pyvo.dal.TAPService("http://voparis-tap-planeto.obspm.fr/tap")
+
+
+def getInfo(name):
+    query = "SELECT * FROM exoplanet.epn_core WHERE target_name ILIKE '%"+name+"%'"
+    results = service.search(query) 
+    return results
 
 
 def getVal(i, arr) :
@@ -145,7 +157,7 @@ class CustomDialog(QDialog):
         self.buttonBox.accepted.connect(self.accept)
         self.buttonBox.rejected.connect(self.reject)
 
-        self.label = QLabel("Built by Chris de CLAVERIE and Magdalena Calka !\nIPSA CIRI Exoplanet Transits 2020")
+        self.label = QLabel("Built by Chris de CLAVERIE, Magdalena CALKA and William BOITIER!\nIPSA CIRI Exoplanet Transits 2020")
 
         self.layout = QVBoxLayout()
         self.layout.addWidget(self.label)
@@ -189,7 +201,7 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         self.main_widget = QtWidgets.QWidget(self)
 
         
-        self.setGeometry(50, 50, 800, 800)
+        self.setGeometry(50, 50, 1200, 800)
         self.setWindowTitle('Review')    
         
 
@@ -199,6 +211,7 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         grid = QGridLayout(self.main_widget)
         grid.addWidget(self.GroupGraph(), 0,0)
         grid.addWidget(self.GroupResult(),0,1)
+        grid.addWidget(self.GroupDataBase(),0,2)
         grid.setSpacing(10)
 
         self.k = 8
@@ -395,6 +408,17 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         return groupBoxGraph
         
     def GroupResult(self):
+        # Menu deroulant
+        self.MenuD = QComboBox(self)
+        model = QSqlTableModel(self)
+        model.setTable("Reference_Star")
+        model.select()
+
+        self.MenuD.setModel(model)
+        self.MenuD.setModelColumn(1)
+        labelMenuD = QtWidgets.QLabel()
+        labelMenuD.setText("Reference Star")
+
         labelRadius = QtWidgets.QLabel()
         labelRadius.setText("Enter the Star's radius (solar radius):")
 
@@ -484,6 +508,8 @@ class ApplicationWindow(QtWidgets.QMainWindow):
 
         groupBoxResult = QGroupBox('Results')
         vbox = QVBoxLayout()
+        vbox.addWidget(labelMenuD)
+        vbox.addWidget(self.MenuD)
         vbox.addLayout(GridResult)
         vbox.addWidget(self.labelInfosK)
         vbox.addWidget(sliderK)
@@ -496,6 +522,48 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         groupBoxResult.setLayout(vbox)       
         
         return groupBoxResult
+    
+    def GroupDataBase(self):
+        #- un champ de recherche pour le nom de l'exoplanète
+        #- un bouton "rechercher"
+        #- une liste déroulante pour sélectionner celle qui nous intéresse parmi les résultats de recherche
+        #- un bouton "importer" pour importer les data (rayon + période orbitale)
+
+        labelName = QtWidgets.QLabel()
+        labelName.setText("Exoplanet Name:          ")
+
+        self.NP_input = QLineEdit()
+
+        self.buttonS = QPushButton('Search', self)
+        self.buttonS.setToolTip('Search')
+        self.buttonS.clicked.connect(self.onResearchClick)
+
+        self.MenuD = QComboBox(self)
+
+        self.labelMenuD = QtWidgets.QLabel()
+        self.labelMenuD.setText("Result choice : ")
+
+        self.buttonImport = QPushButton('Import', self)
+        self.buttonImport.setToolTip('Import')
+        self.buttonImport.clicked.connect(self.importSelection)
+
+
+        groupBoxDataBase = QGroupBox('Import Data')
+        hbox = QVBoxLayout()
+        hbox.addWidget(labelName)
+        hbox.addWidget(self.NP_input)
+        hbox.addWidget(self.buttonS)
+        hbox.addWidget(self.labelMenuD)
+        hbox.addWidget(self.MenuD)
+        hbox.addWidget(self.buttonImport)
+
+        hbox.addLayout(hbox)
+        hbox.addStretch(1)
+        groupBoxDataBase.setLayout(hbox)
+
+
+
+        return groupBoxDataBase
 
 
     def fileQuit(self):
@@ -527,6 +595,25 @@ class ApplicationWindow(QtWidgets.QMainWindow):
 
     def compute_figures(self):
         self.parseData()
+    
+    def onResearchClick(self):
+        val = self.NP_input.text()
+        if(len(val) < 3):
+            print("NO")
+            return
+        self.results = getInfo(val)
+        names = [i.get('target_name').decode("utf-8")  for i in self.results]
+        self.labelMenuD.setText("Result choice ("+str(len(self.results))+" results): ")
+        self.MenuD.clear()
+        self.MenuD.addItems(names)
+
+    def importSelection(self):
+        index = self.MenuD.currentIndex()
+        entry = self.results[index]
+        self.RS_input.setText(str(entry.get('star_radius')))
+        self.Per_input.setText(str(entry.get('period')))
+        print(entry.get('star_radius'), entry.get('period'))
+
 
 qApp = QtWidgets.QApplication(sys.argv)
 
