@@ -5,10 +5,13 @@ import random
 import matplotlib
 matplotlib.use('Qt5Agg')
 
+
+from PyQt5.QtSql import QSqlTableModel
 from PyQt5 import QtCore, QtWidgets
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, pyqtSlot
 from PyQt5.QtWidgets import (QWidget, QLabel, QLineEdit, 
-    QTextEdit, QGridLayout, QApplication, QGroupBox, QVBoxLayout, QWidget, QSlider, QFileDialog, QDialog, QDialogButtonBox)
+    QTextEdit, QGridLayout, QApplication, QGroupBox, QVBoxLayout, QWidget, QSlider, QFileDialog, QDialog, QDialogButtonBox,
+    QTableView, QComboBox, QPushButton)
 from PyQt5.QtGui import QDoubleValidator
 
 from numpy import arange, sin, pi
@@ -201,6 +204,7 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         grid = QGridLayout(self.main_widget)
         grid.addWidget(self.GroupGraph(), 0,0)
         grid.addWidget(self.GroupResult(),0,1)
+        grid.addWidget(self.GroupDataBase(),0,2)
         grid.setSpacing(10)
 
         self.k = 8
@@ -391,6 +395,17 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         return groupBoxGraph
         
     def GroupResult(self):
+        # Menu deroulant
+        self.MenuD = QComboBox(self)
+        model = QSqlTableModel(self)
+        model.setTable("Reference_Star")
+        model.select()
+
+        self.MenuD.setModel(model)
+        self.MenuD.setModelColumn(1)
+        labelMenuD = QtWidgets.QLabel()
+        labelMenuD.setText("Reference Star")
+
         labelRadius = QtWidgets.QLabel()
         labelRadius.setText("Enter the Star's radius (kilometers):")
 
@@ -478,6 +493,8 @@ class ApplicationWindow(QtWidgets.QMainWindow):
 
         groupBoxResult = QGroupBox('Results')
         vbox = QVBoxLayout()
+        vbox.addWidget(labelMenuD)
+        vbox.addWidget(self.MenuD)
         vbox.addLayout(GridResult)
         vbox.addWidget(self.labelInfosK)
         vbox.addWidget(sliderK)
@@ -490,6 +507,53 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         groupBoxResult.setLayout(vbox)       
         
         return groupBoxResult
+    
+    def GroupDataBase(self):
+        #- un champ de recherche pour le nom de l'exoplanète
+        #- un bouton "rechercher"
+        #- une liste déroulante pour sélectionner celle qui nous intéresse parmi les résultats de recherche
+        #- un bouton "importer" pour importer les data (rayon + période orbitale)
+
+        labelName = QtWidgets.QLabel()
+        labelName.setText("Exoplanet Name:          ")
+
+        self.NP_input = QLineEdit()
+        #self.NP_input.returnPressed.connect()
+
+        buttonS = QPushButton('Search', self)
+        buttonS.setToolTip('Search')
+
+        self.MenuD = QComboBox(self)
+        model = QSqlTableModel(self)
+        model.setTable("Reference_Star")
+        model.select()
+
+        self.MenuD.setModel(model)
+        self.MenuD.setModelColumn(1)
+        labelMenuD = QtWidgets.QLabel()
+        labelMenuD.setText("Result choice: ")
+
+        buttonImport = QPushButton('Import', self)
+        buttonImport.setToolTip('Import')
+
+
+
+        groupBoxDataBase = QGroupBox('Import Data')
+        hbox = QVBoxLayout()
+        hbox.addWidget(labelName)
+        hbox.addWidget(self.NP_input)
+        hbox.addWidget(buttonS)
+        hbox.addWidget(labelMenuD)
+        hbox.addWidget(self.MenuD)
+        hbox.addWidget(buttonImport)
+
+        hbox.addLayout(hbox)
+        hbox.addStretch(1)
+        groupBoxDataBase.setLayout(hbox)
+
+
+
+        return groupBoxDataBase
 
 
     def fileQuit(self):
