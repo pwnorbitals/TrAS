@@ -3,6 +3,7 @@ import sys
 import os
 import random
 import matplotlib
+import pyvo
 matplotlib.use('Qt5Agg')
 
 
@@ -29,9 +30,17 @@ from math import floor
 
 from scipy.ndimage import gaussian_filter1d
 
-jiulian = __import__("jiulian")
 
+
+jiulian = __import__("jiulian")
 progname = os.path.basename(sys.argv[0])
+service = pyvo.dal.TAPService("http://voparis-tap-planeto.obspm.fr/tap")
+
+
+def getInfo(name):
+    query = "SELECT * FROM exoplanet.epn_core WHERE target_name ILIKE '%"+name+"%'"
+    results = service.search(query) 
+    return results
 
 
 def getVal(i, arr) :
