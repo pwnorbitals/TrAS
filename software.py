@@ -82,7 +82,7 @@ def Param(R_star, Period, time, k_ps, Y):
     sinT_t = np.float_power( np.sin(T_t * np.pi/Period), 2) 
     sinT_f = np.float_power( np.sin(T_f * np.pi/Period), 2)
 
-    return Depth, sinT_t, sinT_f
+    return Depth, sinT_t, sinT_f, T_t, T_f
 
 def Impact_parameter(sinT_t, sinT_f, Depth):
     """
@@ -91,8 +91,6 @@ def Impact_parameter(sinT_t, sinT_f, Depth):
     """
     A = np.float_power((1 + np.sqrt(Depth)), 2)
     B = np.float_power((1 - np.sqrt(Depth)), 2)
-    print(sinT_t)
-    print(sinT_f)
     b = np.sqrt(abs(B - sinT_f*A/sinT_t) / (1 - sinT_f/sinT_t))
     return b
 
@@ -347,9 +345,13 @@ class ApplicationWindow(QtWidgets.QMainWindow):
 
 
             # Deduce parameters
-        R_s = self.Star_Radius
-        Period = self.Period
-        Depth, sintt, sintf = Param(R_s, Period, timestamps, boundaries, mag)
+        
+        #Conversion in km and in seconds
+        Sun_rad = 695700
+        R_s = self.Star_Radius * Sun_rad
+        Period = self.Period * 86400
+
+        Depth, sintt, sintf, Tot, full = Param(R_s, Period, timestamps, boundaries, mag)
         imp_b = Impact_parameter(sintt, sintf, Depth)
         Semi_a = Semimajor(R_s, sintt, Depth, imp_b)
         alpha = Inclinaison(R_s, Semi_a, imp_b)
@@ -361,10 +363,12 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         planet = "Planet radius : %.5E (km)" % R_p + "\nPlanet mass : %.3E (kg)" % M_planet
         star = "Star density : %.5E" % Star_d + "\nStar mass : %.3E (kg)" % M_star
         other = "Impact parameter b : %.5E" % imp_b + "\nSemi-major a : %.5E (km)" % Semi_a + "\nInclinaison : %.3f °" % alpha
+        lightcurve = "Depth : %.3f" % Depth + "\nTotal duration : %.3E" % Tot + "\nFull duration : %.3E" % full
 
         self.PlanetLabel.setText(planet)
         self.StarLabel.setText(star)
         self.Other.setText(other)
+        self.LC.setText(lightcurve)
 
         self.labelInfosK.setText('Change the K coefficient : %i  (note: coeff was calculated to be optimal)' % self.sk.value())
         self.labelInfosS.setText('Change the s coefficient : %i' % self.ss.value())
@@ -392,14 +396,15 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         
     def GroupResult(self):
         labelRadius = QtWidgets.QLabel()
-        labelRadius.setText("Enter the Star's radius (kilometers):")
+        labelRadius.setText("Enter the Star's radius (solar radius):")
 
         labelPeriod = QtWidgets.QLabel()
-        labelPeriod.setText("Enter the Period of orbit (seconds):")
+        labelPeriod.setText("Enter the Period of orbit (days):")
 
         self.PlanetLabel = QLabel('Planet radius : \nPlanet mass : ')
         self.StarLabel = QLabel('Star density : \nStar mass : ')
-        self.Other = QLabel('Impact parameter b : \nSemimajor axis a : \n Inclinaison : ')
+        self.Other = QLabel('Impact parameter b : \nSemimajor axis a : \nInclinaison : ')
+        self.LC = QLabel('Depth : \nTotal duration : \nFull duration : ')
 
         self.labelInfosK = QLabel('Change the K coefficient :  (note: coeff was calculated to be optimal)')
 
@@ -474,7 +479,8 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         #Deduced Parameter
         GridResult.addWidget(self.PlanetLabel, 2,0)
         GridResult.addWidget(self.StarLabel, 3,0)
-        GridResult.addWidget(self.Other, 2,1)
+        GridResult.addWidget(self.LC, 2,1)
+        GridResult.addWidget(self.Other, 3,1)
 
         groupBoxResult = QGroupBox('Results')
         vbox = QVBoxLayout()
