@@ -5,6 +5,7 @@ import random
 import matplotlib
 import pyvo
 import math
+import threading
 matplotlib.use('Qt5Agg')
 
 
@@ -172,8 +173,18 @@ service = pyvo.dal.TAPService("http://voparis-tap-planeto.obspm.fr/tap")
 
 def getInfo(name):
     query = "SELECT * FROM exoplanet.epn_core WHERE target_name ILIKE '%"+name+"%'"
-    results = service.search(query) 
-    return results
+    try:
+         results = service.search(query)
+         return results
+    except Exception as e:
+        msg = QMessageBox()
+        msg.setIcon(QMessageBox.Critical)
+        msg.setText("Could not fetch the data")
+        msg.setInformativeText("An error occurred when trying to fetch catalog data.\n\nException : " + str(e))
+        msg.setWindowTitle("Catalog error")
+        msg.setStandardButtons(QMessageBox.Ok)
+        msg.exec_()
+    
 
 
 def getVal(i, arr) :
@@ -667,15 +678,11 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         return groupBoxResult
     
     def GroupDataBase(self):
-        #- un champ de recherche pour le nom de l'exoplanète
-        #- un bouton "rechercher"
-        #- une liste déroulante pour sélectionner celle qui nous intéresse parmi les résultats de recherche
-        #- un bouton "importer" pour importer les data (rayon + période orbitale)
-
         labelName = QtWidgets.QLabel()
         labelName.setText("Exoplanet Name:          ")
 
         self.NP_input = QLineEdit()
+        self.NP_input.returnPressed.connect(self.onResearchClick)
 
         self.buttonS = QPushButton('Search', self)
         self.buttonS.setToolTip('Search')
@@ -700,7 +707,6 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         hbox.addWidget(self.MenuD)
         hbox.addWidget(self.buttonImport)
 
-        hbox.addLayout(hbox)
         hbox.addStretch(1)
         groupBoxDataBase.setLayout(hbox)
 
@@ -737,18 +743,33 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         self.compute_figures()
 
     def compute_figures(self):
-        self.parseData()
+        try:
+            self.parseData()
+        except Exception as e:
+            msg = QMessageBox()
+            msg.setIcon(QMessageBox.Critical)
+            msg.setText("Could not compute the data")
+            msg.setInformativeText("An error occurred when trying to compute the data.\n\nException : " + str(e))
+            msg.setWindowTitle("Internal error")
+            msg.setStandardButtons(QMessageBox.Ok)
+            msg.exec_()
+        
     
     def onResearchClick(self):
-        val = self.NP_input.text()
-        if(len(val) < 3):
+        self.searchval = self.NP_input.text()
+        if(len(self.searchval) < 3):
             print("NO")
             return
-        self.results = getInfo(val)
-        names = [i.get('target_name').decode("utf-8")  for i in self.results]
-        self.labelMenuD.setText("Result choice ("+str(len(self.results))+" results): ")
-        self.MenuD.clear()
-        self.MenuD.addItems(names)
+        
+        self.results = getInfo(self.searchval)
+        if self.results:
+            names = [i.get('target_name').decode("utf-8")  for i in self.results]
+            self.labelMenuD.setText("Result choice ("+str(len(self.results))+" results): ")
+            self.MenuD.clear()
+            self.MenuD.addItems(names)
+        
+        
+       
 
     def importSelection(self):
         index = self.MenuD.currentIndex()
