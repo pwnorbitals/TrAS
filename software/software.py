@@ -6,6 +6,8 @@ import matplotlib
 import pyvo
 import math
 import threading
+import jiulian as jd
+import computations as comp
 matplotlib.use('Qt5Agg')
 
 
@@ -34,136 +36,7 @@ from scipy.ndimage import gaussian_filter1d
 
 
 
-def __to_format(jd: float, fmt: str) -> float:
-    """
-    Converts a Julian Day object into a specific format.  For
-    example, Modified Julian Day.
-    Parameters
-    ----------
-    jd: float
-    fmt: str
 
-    Returns
-    -------
-    jd: float
-    """
-    if fmt.lower() == 'jd':
-        return jd
-    elif fmt.lower() == 'mjd':
-        return jd - 2400000.5
-    elif fmt.lower() == 'rjd':
-        return jd - 2400000
-    else:
-        raise ValueError('Invalid Format')
-
-
-def __from_format(jd: float, fmt: str) -> (int, float):
-    """
-    Converts a Julian Day format into the "standard" Julian
-    day format.
-    Parameters
-    ----------
-    jd
-    fmt
-
-    Returns
-    -------
-    (jd, fractional): (int, float)
-         A tuple representing a Julian day.  The first number is the
-         Julian Day Number, and the second is the fractional component of the
-         day.  A fractional component of 0.5 represents noon.  Therefore
-         the standard julian day would be (jd + fractional + 0.5)
-    """
-    if fmt.lower() == 'jd':
-        # If jd has a fractional component of 0, then we are 12 hours into
-        # the day
-        return math.floor(jd + 0.5), jd + 0.5 - math.floor(jd + 0.5)
-    elif fmt.lower() == 'mjd':
-        return __from_format(jd + 2400000.5, 'jd')
-    elif fmt.lower() == 'rjd':
-        return __from_format(jd + 2400000, 'jd')
-    else:
-        raise ValueError('Invalid Format')
-
-
-def to_jd(dt: datetime, fmt: str = 'jd') -> float:
-    """
-    Converts a given datetime object to Julian date.
-    Algorithm is copied from https://en.wikipedia.org/wiki/Julian_day
-    All variable names are consistent with the notation on the wiki page.
-
-    Parameters
-    ----------
-    fmt
-    dt: datetime
-        Datetime object to convert to MJD
-
-    Returns
-    -------
-    jd: float
-    """
-    a = math.floor((14-dt.month)/12)
-    y = dt.year + 4800 - a
-    m = dt.month + 12*a - 3
-
-    jdn = dt.day + math.floor((153*m + 2)/5) + 365*y + math.floor(y/4) - math.floor(y/100) + math.floor(y/400) - 32045
-
-    jd = jdn + (dt.hour - 12) / 24 + dt.minute / 1440 + dt.second / 86400 + dt.microsecond / 86400000000
-
-    return __to_format(jd, fmt)
-
-
-def from_jd(jd: float, fmt: str = 'jd') -> datetime:
-    """
-    Converts a Julian Date to a datetime object.
-    Algorithm is from Fliegel and van Flandern (1968)
-
-    Parameters
-    ----------
-    jd: float
-        Julian Date as type specified in the string fmt
-
-    fmt: str
-
-    Returns
-    -------
-    dt: datetime
-
-    """
-    jd, jdf = __from_format(jd, fmt)
-
-    l = jd+68569
-    n = 4*l//146097
-    l = l-(146097*n+3)//4
-    i = 4000*(l+1)//1461001
-    l = l-1461*i//4+31
-    j = 80*l//2447
-    k = l-2447*j//80
-    l = j//11
-    j = j+2-12*l
-    i = 100*(n-49)+i+l
-
-    year = int(i)
-    month = int(j)
-    day = int(k)
-
-    # in microseconds
-    frac_component = int(jdf * (1e6*24*3600))
-
-    hours = int(frac_component // (1e6*3600))
-    frac_component -= hours * 1e6*3600
-
-    minutes = int(frac_component // (1e6*60))
-    frac_component -= minutes * 1e6*60
-
-    seconds = int(frac_component // 1e6)
-    frac_component -= seconds*1e6
-
-    frac_component = int(frac_component)
-
-    dt = datetime(year=year, month=month, day=day,
-                  hour=hours, minute=minutes, second=seconds, microsecond=frac_component)
-    return dt
 
 
 
@@ -198,96 +71,7 @@ def getVal(i, arr) :
 def smooth(inlist, param):
     return gaussian_filter1d(inlist, param)
 
-def Find_tftt(T, kp, Y):
-    mean = sum(Y)/len(Y)
-    Up_1 = 0
-    Down_1 = 0
-    Up_2 = 0
-    Down_2 = 0
 
-    for i in range(len(Y)):
-        if (Y[i] < mean and Down_1 == 0):
-            Down_1 = T[kp[i]]
-        elif (Y[i] < mean and Down_1 != 0):
-            Down_2 = T[kp[i]]
-        else:
-            if (Down_1 == 0):
-                Up_1 = T[kp[i]]
-            elif(Down_2 != 0 and Up_2 == 0):
-                Up_2 = T[kp[i]]
-    
-    T_t = Up_2 - Up_1
-    if Down_2 == 0:
-        T_f = 0
-    else:
-        T_f = Down_2 - Down_1
-    return T_t, T_f
-
-
-def Param(R_star, Period, time, k_ps, Y):
-    """
-    Input : Radius of the star, Period in seconds,
-    timestamp in seconds, kept_peaks, magnitude
-    """
-    # Light curve data
-    T_t, T_f = Find_tftt(time, k_ps, Y)
-    Depth = abs(max(Y) - min(Y))
-    print("\t",T_t)
-    print("\t",T_f)
-    # Impact parameter b
-    sinT_t = np.float_power( np.sin(T_t * np.pi/Period), 2) 
-    sinT_f = np.float_power( np.sin(T_f * np.pi/Period), 2)
-
-    return Depth, sinT_t, sinT_f, T_t, T_f
-
-def Impact_parameter(sinT_t, sinT_f, Depth):
-    """
-    Input : sin^2(T_t*pi/Period), sin^2(T_f*pi/Period),
-    Depth
-    """
-    A = np.float_power((1 + np.sqrt(Depth)), 2)
-    B = np.float_power((1 - np.sqrt(Depth)), 2)
-    b = np.sqrt(abs(B - sinT_f*A/sinT_t) / (1 - sinT_f/sinT_t))
-    return b
-
-def Semimajor(R_star, sinT_t, Depth, b):
-    """
-    Input : Radius of the star, sin^2(T_t*pi/Period),
-    Depth (or Delta Flux), impact parameter b
-    """
-    A = np.float_power((1 + np.sqrt(Depth)), 2)
-    a = R_star * np.sqrt(abs(A - (1-sinT_t)*np.float_power(b, 2)) / (sinT_t))
-    return a
-
-def Inclinaison(R_star, a, b):
-    """
-    Input : Radius of the star, semi-major axis a,
-    impact parameter b
-    """
-    i = np.arccos(R_star*b/a)
-    return i*180/np.pi
-
-def Planet_radius(R_star, Depth):
-    Rp = R_star*np.sqrt(Depth)
-    return Rp
-
-def Star_density(Depth, b, sinT_t, Period):
-    G = 6.67430 * np.float_power(10, -17)
-    A = np.float_power((1 + np.sqrt(Depth)), 2)
-    x1 = (4* np.float_power(np.pi, 2) )/(G* np.float_power(Period, 2))
-    x2 = (A-np.float_power(b, 2)*(1-sinT_t)) / sinT_t
-
-    rho_star = x1 * np.float_power(x2, 3/2)
-    return rho_star
-
-def Star_mass(R_star, rho_star):
-    M_star = (4/3) * np.pi * rho_star * np.float_power(R_star, 3)
-    return M_star
-
-def Planet_mass(M_star, Period, a):
-    G = 6.67430 * np.float_power(10, -17)
-    M_planet = abs((4 * np.float_power(np.pi, 2) * np.float_power(a, 3))/(G * np.float_power(Period, 2)) - M_star)
-    return M_planet
 
 class CustomDialog(QDialog):
     def __init__(self, *args, **kwargs):
@@ -403,7 +187,7 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         VC = data[header.index("V-C")]
         VC = [-1 * float(d) for d in VC]
         #HELCOR= data[header.index("HELCOR")]
-        dates = [from_jd(float(mjd), fmt='jd') for mjd in JDHEL]
+        dates = [jd.from_jd(float(mjd), fmt='jd') for mjd in JDHEL]
         timestamps_orig = [datetime.timestamp(i) for i in dates]
         timestamps = [i-timestamps_orig[0] for i in timestamps_orig]
 
@@ -518,14 +302,14 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         R_s = self.Star_Radius * Sun_rad
         Period = self.Period * 86400
 
-        Depth, sintt, sintf, Tot, full = Param(R_s, Period, timestamps, boundaries, mag)
-        imp_b = Impact_parameter(sintt, sintf, Depth)
-        Semi_a = Semimajor(R_s, sintt, Depth, imp_b)
-        alpha = Inclinaison(R_s, Semi_a, imp_b)
-        R_p = Planet_radius(R_s, Depth)
-        Star_d = Star_density(Depth, imp_b, sintt, Period)
-        M_star = Star_mass(R_s, Star_d)
-        M_planet = Planet_mass(M_star, Period, Semi_a)
+        Depth, sintt, sintf, Tot, full = comp.Param(R_s, Period, timestamps, boundaries, mag)
+        imp_b = comp.Impact_parameter(sintt, sintf, Depth)
+        Semi_a = comp.Semimajor(R_s, sintt, Depth, imp_b)
+        alpha = comp.Inclinaison(R_s, Semi_a, imp_b)
+        R_p = comp.Planet_radius(R_s, Depth)
+        Star_d = comp.Star_density(Depth, imp_b, sintt, Period)
+        M_star = comp.Star_mass(R_s, Star_d)
+        M_planet = comp.Planet_mass(M_star, Period, Semi_a)
 
         planet = "Planet radius : %.5E (km)" % R_p + "\nPlanet mass : %.3E (kg)" % M_planet
         star = "Star density : %.5E" % Star_d + "\nStar mass : %.3E (kg)" % M_star
@@ -634,7 +418,7 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         sliderP.setFocusPolicy(Qt.StrongFocus)
         sliderP.setTickPosition(QSlider.TicksBothSides)
         sliderP.setTickInterval(10)
-        sliderP.setSingleStep(0.1)
+        sliderP.setSingleStep(1)
         sliderP.valueChanged.connect(self.changeP)
         self.sp = sliderP
         sliderP.setValue(self.prominence)
@@ -808,6 +592,3 @@ aw = ApplicationWindow()
 aw.setWindowTitle("%s" % progname)
 aw.show()
 sys.exit(qApp.exec_())
-
-datax = [random.random() for i in range(25)]
-datay = [random.random() for i in range(25)]
