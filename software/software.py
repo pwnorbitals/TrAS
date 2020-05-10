@@ -13,7 +13,7 @@ from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtCore import Qt, pyqtSlot
 from PyQt5.QtWidgets import (QWidget, QLabel, QLineEdit, 
     QTextEdit, QGridLayout, QApplication, QGroupBox, QVBoxLayout, QWidget, QSlider, QFileDialog, QDialog, QDialogButtonBox,
-    QTableView, QComboBox, QPushButton)
+    QTableView, QComboBox, QPushButton, QMessageBox)
 from PyQt5.QtGui import QDoubleValidator
 
 from numpy import arange, sin, pi
@@ -366,8 +366,18 @@ class ApplicationWindow(QtWidgets.QMainWindow):
             file = open(file[0], 'r')
             lines = file.readlines()
             file.close()
-            self.lines = [line[:-1].split(' ') for line in lines]
-            self.parseData()
+            try:
+                self.lines = [line[:-1].split(' ') for line in lines]
+                self.parseData()
+            except Exception as e:
+                msg = QMessageBox()
+                msg.setIcon(QMessageBox.Critical)
+                msg.setText("Could not load the selected file")
+                msg.setInformativeText("The file you tried to open is not in the right format.\n\nException : " + str(e))
+                msg.setWindowTitle("Open exception")
+                msg.setStandardButtons(QMessageBox.Ok)
+                msg.exec_()
+
 
     def parseData(self):
         if not hasattr(self, "lines"):
