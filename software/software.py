@@ -452,7 +452,7 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         self.errorCanvas.axes.plot(timestamps, errors_smoothed)
 
         # Find local maxima
-        peaks, properties = find_peaks(errors_smoothed, prominence=1e-8)
+        peaks, properties = find_peaks(errors_smoothed, prominence=10**(-self.prominence))
         print("PEAKS : ", peaks)
         print("PEAKS Y : ", errors_smoothed[peaks])
 
@@ -595,6 +595,9 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         tuto2 = "\n\nThe s coefficient is the number of samples used to smooth the data."
         labeltuto = QLabel(tuto1+tuto2)
 
+        self.labelInfoP = QtWidgets.QLabel()
+        self.labelInfoP.setText('The prominence value changes the sensitivity of peak detection on the errors graph : ')
+
         self.validator = QDoubleValidator()
         self.RS_input = QLineEdit()
         self.RS_input.setValidator(self.validator)
@@ -604,6 +607,7 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         self.Per_input.setValidator(self.validator)
         self.Per_input.returnPressed.connect(self.PeriodChanged)
 
+        self.s = 2
         sliderS = QSlider(Qt.Horizontal)
         sliderS.setFocusPolicy(Qt.StrongFocus)
         sliderS.setTickPosition(QSlider.TicksBothSides)
@@ -612,8 +616,9 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         sliderS.setMinimum(1)
         sliderS.valueChanged.connect(self.changeS)
         self.ss = sliderS
-        sliderS.setValue(2)
+        sliderS.setValue(self.s)
 
+        self.k = 8
         sliderK = QSlider(Qt.Horizontal)
         sliderK.setFocusPolicy(Qt.StrongFocus)
         sliderK.setTickPosition(QSlider.TicksBothSides)
@@ -622,8 +627,19 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         sliderK.setMinimum(2)
         sliderK.valueChanged.connect(self.changeK)
         self.sk = sliderK
-        sliderK.setValue(8)
+        sliderK.setValue(self.k)
 
+        self.prominence = 8
+        sliderP = QSlider(Qt.Horizontal)
+        sliderP.setFocusPolicy(Qt.StrongFocus)
+        sliderP.setTickPosition(QSlider.TicksBothSides)
+        sliderP.setTickInterval(10)
+        sliderP.setSingleStep(0.1)
+        sliderP.valueChanged.connect(self.changeP)
+        self.sp = sliderP
+        sliderP.setValue(self.prominence)
+
+        self.a = 0
         sliderA = QSlider(Qt.Horizontal)
         sliderA.setFocusPolicy(Qt.StrongFocus)
         sliderA.setTickPosition(QSlider.TicksBothSides)
@@ -631,8 +647,9 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         sliderA.setSingleStep(1)
         sliderA.valueChanged.connect(self.changeA)
         self.sa = sliderA
-        sliderA.setValue(0)
+        sliderA.setValue(self.a)
 
+        self.b = 0
         sliderB = QSlider(Qt.Horizontal)
         sliderB.setFocusPolicy(Qt.StrongFocus)
         sliderB.setTickPosition(QSlider.TicksBothSides)
@@ -641,7 +658,7 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         sliderB.valueChanged.connect(self.changeB)
         sliderB.setInvertedAppearance(True)
         self.sb = sliderB
-        sliderB.setValue(0)
+        sliderB.setValue(self.b)
 
         hbox = QtWidgets.QHBoxLayout()
         hbox.addWidget(sliderA)
@@ -669,6 +686,8 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         vbox.addWidget(sliderK)
         vbox.addWidget(self.labelInfosS)
         vbox.addWidget(sliderS)
+        vbox.addWidget(self.labelInfoP)
+        vbox.addWidget(sliderP)
         vbox.addWidget(labelInfosA)
         vbox.addLayout(hbox)
         vbox.addWidget(labeltuto)
@@ -740,6 +759,10 @@ class ApplicationWindow(QtWidgets.QMainWindow):
 
     def changeK(self):
         self.k = self.sk.value()
+        self.compute_figures()
+
+    def changeP(self):
+        self.p = self.sp.value()
         self.compute_figures()
 
     def compute_figures(self):
