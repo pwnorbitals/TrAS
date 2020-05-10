@@ -4,7 +4,7 @@ block_cipher = None
 
 
 a = Analysis(['software.py'],
-             pathex=['C:\\Users\\Magix\\Documents\\SIRI-Transits-2020'],
+             pathex=['C:\\Users\\Magix\\Documents\\SIRI-Transits-2020\\software'],
              binaries=[],
              datas=[],
              hiddenimports=[],

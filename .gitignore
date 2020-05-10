@@ -1,2 +1,4 @@
 __pyccache__
 .vscode
+software/build
+software/dist
