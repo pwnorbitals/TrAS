@@ -1,7 +1,0 @@
-Interface graphique exoplanètes :
-
-- Slider pour varier K (défaut : 20. A l'update : recalcul des graphes)
-- Sliders pour varier start_at et end_at (ignorer les valeurs hors-transit. A l'update : recalcul des graphes)
-- 2 courbes : VC selon timestamps avec séparations + régressions linéaires (haut), errors selon timestamps avec séparations (bas)
-- Afficher R^2 pour chaque section de régression linéaire ?
-
