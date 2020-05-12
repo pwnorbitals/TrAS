@@ -10,8 +10,6 @@ import jiulian as jd
 import computations as comp
 matplotlib.use('Qt5Agg')
 
-# 7a4949
-
 from PyQt5.QtSql import QSqlTableModel
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtCore import Qt, pyqtSlot
@@ -20,7 +18,7 @@ from PyQt5.QtWidgets import (QWidget, QLabel, QLineEdit,
     QTableView, QComboBox, QPushButton, QMessageBox)
 from PyQt5.QtGui import QDoubleValidator
 
-from numpy import arange, sin, pi
+from numpy import arange, sin, pi, std
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
@@ -30,13 +28,16 @@ import matplotlib.pyplot as plt
 from scipy.signal import find_peaks
 from scipy.stats import linregress
 from datetime import datetime
+import matplotlib as mpl
 from matplotlib.widgets import Slider
 from math import floor
 
 from scipy.ndimage import gaussian_filter1d
 
 
-
+plt.style.use('ggplot')
+plt.rcParams["font.size"] = 6
+mpl.rcParams['toolbar'] = 'None'
 progname = os.path.basename(sys.argv[0])
 service = pyvo.dal.TAPService("http://voparis-tap-planeto.obspm.fr/tap")
 
@@ -55,6 +56,20 @@ def getInfo(name):
         msg.setStandardButtons(QMessageBox.Ok)
         msg.exec_()
     
+def windowAround(arr, pos, halfsize):
+    start = 0
+    if pos - halfsize < 0:
+        start = 0
+    else:
+        start = pos - halfsize
+
+    end = len(arr)
+    if pos + halfsize > len(arr):
+        end = len(arr)
+    else:
+        end = pos + halfsize
+
+    return arr[start:end]
 
 
 def getVal(i, arr) :
@@ -220,24 +235,20 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         #print(VC)
         self.dataCanvas.axes.clear()
         self.dataCanvas.axes.set_title("Data")
-        self.dataCanvas.axes.plot(timestamps, [float(d) for d in VC])
+        self.dataCanvas.axes.plot(timestamps, [float(d) for d in VC], linewidth=1.0)
 
         # Compute standard errors (use tunable parameter)
         errors = []
         for i in range(len(VC)):
-            #min_max = (i - nb_vals, i + nb_vals)
-            vals = [float(getVal(i + j, VC)) for j in range(-nb_vals, +nb_vals)]
-            #print(vals)
-            avg = np.average(vals)
-            sn = np.sqrt((1/(len(vals)-1)) * sum([(xi - avg)**2 for xi in vals]) )  # Standard deviation
-            #print(med, sn)
-            errors.append(sn / np.sqrt(len(vals)))
+            #vals = [float(getVal(i + j, VC)) for j in range(-nb_vals, +nb_vals)]
+            vals = windowAround(VC, i, nb_vals)
+            errors.append(std(vals))
 
             #print(errors)
         errors_smoothed = smooth(errors, nb_vals)
         self.errorCanvas.axes.clear()
         self.errorCanvas.axes.set_title('Standard errors')
-        self.errorCanvas.axes.plot(timestamps, errors_smoothed)
+        self.errorCanvas.axes.plot(timestamps, errors_smoothed, linewidth=1.0)
 
         # Find local maxima
         peaks, properties = find_peaks(errors_smoothed, prominence=10**(-self.prominence))
@@ -253,7 +264,7 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         kept_peaks = [elem[1] for elem in sorted_kept_peaks]
 
         for i in range(len(kept_peaks)):
-            self.errorCanvas.axes.axvline(x=timestamps[kept_peaks[i]], color='red')
+            self.errorCanvas.axes.axvline(x=timestamps[kept_peaks[i]], color='blue')
 
         # Fit between SE maxima (linear regression)
         # https://exoplanetarchive.ipac.caltech.edu/docs/datasethelp/AXA.html
