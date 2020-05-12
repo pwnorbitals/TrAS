@@ -15,7 +15,7 @@ from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtCore import Qt, pyqtSlot
 from PyQt5.QtWidgets import (QWidget, QLabel, QLineEdit, 
     QTextEdit, QGridLayout, QApplication, QGroupBox, QVBoxLayout, QWidget, QSlider, QFileDialog, QDialog, QDialogButtonBox,
-    QTableView, QComboBox, QPushButton, QMessageBox)
+    QTableView, QComboBox, QPushButton, QMessageBox, QFormLayout)
 from PyQt5.QtGui import QDoubleValidator
 
 from numpy import arange, sin, pi, std
@@ -67,9 +67,9 @@ def smooth(inlist, param):
 
 
 
-class CustomDialog(QDialog):
+class AboutDialog(QDialog):
     def __init__(self, *args, **kwargs):
-        super(CustomDialog, self).__init__(*args, **kwargs)
+        super(AboutDialog, self).__init__(*args, **kwargs)
         
         self.setWindowTitle("About")
         
@@ -85,6 +85,47 @@ class CustomDialog(QDialog):
         self.layout.addWidget(self.label)
         self.layout.addWidget(self.buttonBox)
         self.setLayout(self.layout)
+
+class SettingsDialog(QDialog):
+    def __init__(self, *args, **kwargs):
+        super(SettingsDialog, self).__init__(*args, **kwargs)
+        
+        self.setWindowTitle("Settings")
+        
+        QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
+
+        buttonBox = QDialogButtonBox(QBtn)
+        buttonBox.accepted.connect(self.accept)
+        buttonBox.rejected.connect(self.reject)
+
+        unitsBox = QGroupBox("Units")
+        unitsLayout = QFormLayout()
+        unitsBox.setLayout(unitsLayout)
+
+        lengthLabel = QLabel("Length unit : ")
+        lengthBox = QComboBox()
+        lengthBox.addItems(["Kilometer (km)", "Jupiter radius (RJ)", "Sun radius (RS)", "Astronomical unit (AU)"])
+        unitsLayout.addRow(lengthLabel, lengthBox)
+
+        massLabel = QLabel("Mass unit : ")
+        massBox = QComboBox()
+        massBox.addItems(["Kilogram (kg)", "Tonnes (T)", "Jupiter mass (MJ)", "Sun mass (MS)"])
+        unitsLayout.addRow(massLabel, massBox)
+
+        timeLabel = QLabel("Time unit : ")
+        timeBox = QComboBox()
+        timeBox.addItems(["Second (s)", "Day", "Year"])
+        unitsLayout.addRow(timeLabel, timeBox)
+
+        angleLabel = QLabel("Angles unit : ")
+        angleBox = QComboBox()
+        angleBox.addItems(["Radians (rad)", "Regrees (deg)"])
+        unitsLayout.addRow(angleLabel, angleBox)
+
+        layout = QVBoxLayout()
+        layout.addWidget(unitsBox)
+        layout.addWidget(buttonBox)
+        self.setLayout(layout)
 
 
 class Canvas(FigureCanvas):
@@ -111,8 +152,10 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         self.setWindowTitle("application main window")
 
         self.file_menu = QtWidgets.QMenu('&File', self)
-        self.file_menu.addAction('&Open', self.OpenFile,
+        self.file_menu.addAction('&Open', self.openFile,
                                  QtCore.Qt.CTRL + QtCore.Qt.Key_O)
+        self.file_menu.addAction('&Settings', self.openSettings,
+                                 QtCore.Qt.CTRL + QtCore.Qt.Key_U)
         self.file_menu.addAction('&Quit', self.fileQuit,
                                  QtCore.Qt.CTRL + QtCore.Qt.Key_Q)
         self.menuBar().addMenu(self.file_menu)
@@ -147,10 +190,10 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         self.Y="V-C"
         
     def About(self):
-        dlg = CustomDialog(self)
+        dlg = AboutDialog(self)
         dlg.exec_()
 
-    def OpenFile(self):
+    def openFile(self):
         file = QFileDialog.getOpenFileName(self, 'Open File')
         if file[0]:
             aw.setWindowTitle("%s [%s]" % (progname, file[0]))
@@ -170,6 +213,9 @@ class ApplicationWindow(QtWidgets.QMainWindow):
                 msg.setStandardButtons(QMessageBox.Ok)
                 msg.exec_()
 
+    def openSettings(self):
+        dlg = SettingsDialog(self)
+        dlg.exec_()
 
     def parseData(self):
         if not hasattr(self, "lines"):
