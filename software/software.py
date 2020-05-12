@@ -134,7 +134,7 @@ class ApplicationWindow(QtWidgets.QMainWindow):
 
         grid = QGridLayout(self.main_widget)
         grid.addWidget(self.GroupGraph(), 0,0)
-        grid.addWidget(self.GroupResult(),0,1)
+        grid.addLayout(self.GroupResult(),0,1)
         grid.addWidget(self.GroupDataBase(),0,2)
         grid.setSpacing(10)
 
@@ -465,7 +465,7 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         calbox.addStretch(1)
         groupBoxCalculations.setLayout(calbox)
         
-        groupBoxResult = QGroupBox('Results')
+        groupBoxResult = QGroupBox('Settings')
         vbox = QVBoxLayout()
         vbox.addWidget(labelMenuS)
         vbox.addWidget(self.MenuS)
@@ -478,11 +478,14 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         vbox.addWidget(labelInfosA)
         vbox.addLayout(hbox)
         vbox.addWidget(labeltuto)
-        vbox.addWidget(groupBoxCalculations)
         vbox.addStretch(1)
         groupBoxResult.setLayout(vbox)       
+
+        ret = QVBoxLayout()
+        ret.addWidget(groupBoxResult)
+        ret.addWidget(groupBoxCalculations)
         
-        return groupBoxResult
+        return ret
     
     def GroupDataBase(self):
         labelName = QtWidgets.QLabel()
