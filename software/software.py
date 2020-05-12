@@ -10,6 +10,8 @@ import jiulian as jd
 import computations as comp
 matplotlib.use('Qt5Agg')
 
+# 7a4949
+
 from PyQt5.QtSql import QSqlTableModel
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtCore import Qt, pyqtSlot
@@ -90,7 +92,7 @@ class CustomDialog(QDialog):
 
 class Canvas(FigureCanvas):
     def __init__(self, parent=None, width=5, height=4, dpi=100):
-        fig = Figure(figsize=(width, height), dpi=dpi)
+        fig = Figure(figsize=(width, height), dpi=dpi, facecolor="#f0f0f0")
         self.fig = fig
         self.axes = fig.add_subplot(111)
         super(Canvas, self).__init__(fig)

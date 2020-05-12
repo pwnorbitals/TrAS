@@ -160,6 +160,7 @@ imports:
  &#8226;   <a href="#codecs">codecs</a>
  &#8226;   <a href="#collections">collections</a>
  &#8226;   <a href="#collections.abc">collections.abc</a>
+ &#8226;   <a href="#computations">computations</a>
  &#8226;   <a href="#copyreg">copyreg</a>
  &#8226;   <a href="#datetime">datetime</a>
  &#8226;   <a href="#encodings">encodings</a>
@@ -289,6 +290,7 @@ imports:
  &#8226;   <a href="#functools">functools</a>
  &#8226;   <a href="#heapq">heapq</a>
  &#8226;   <a href="#io">io</a>
+ &#8226;   <a href="#jiulian">jiulian</a>
  &#8226;   <a href="#keyword">keyword</a>
  &#8226;   <a href="#linecache">linecache</a>
  &#8226;   <a href="#locale">locale</a>
@@ -319,6 +321,7 @@ imports:
  &#8226;   <a href="#sre_constants">sre_constants</a>
  &#8226;   <a href="#sre_parse">sre_parse</a>
  &#8226;   <a href="#sys">sys</a>
+ &#8226;   <a href="#threading">threading</a>
  &#8226;   <a href="#traceback">traceback</a>
  &#8226;   <a href="#types">types</a>
  &#8226;   <a href="#warnings">warnings</a>
@@ -881,7 +884,7 @@ imported by:
   <a target="code" href="" type="text/plain"><tt>'pytest_astropy_header.display'</tt></a>
 <span class="moduletype">MissingModule</span>  <div class="import">
 imported by:
-    <a href="#astropy.tests.plugins.display">astropy.tests.plugins.display</a>
+    <a href="#astropy.conftest">astropy.conftest</a>
 
   </div>
 
@@ -4678,14 +4681,14 @@ imported by:
   <a target="code" href="///C:/python38/lib/site-packages/astropy/conftest.py" type="text/plain"><tt>astropy.conftest</tt></a>
 <span class="moduletype">SourceModule</span>  <div class="import">
 imports:
-    <a href="#astropy">astropy</a>
+    <a href="#'pytest_astropy_header.display'">'pytest_astropy_header.display'</a>
+ &#8226;   <a href="#astropy">astropy</a>
  &#8226;   <a href="#astropy.tests.helper">astropy.tests.helper</a>
  &#8226;   <a href="#builtins">builtins</a>
  &#8226;   <a href="#matplotlib">matplotlib</a>
  &#8226;   <a href="#matplotlib.pyplot">matplotlib.pyplot</a>
  &#8226;   <a href="#os">os</a>
  &#8226;   <a href="#pytest">pytest</a>
- &#8226;   <a href="#pytest_astropy_header">pytest_astropy_header</a>
  &#8226;   <a href="#tempfile">tempfile</a>
  &#8226;   <a href="#warnings">warnings</a>
 
@@ -4708,10 +4711,10 @@ imports:
  &#8226;   <a href="#astropy.constants.G">astropy.constants.G</a>
  &#8226;   <a href="#astropy.constants.R_earth">astropy.constants.R_earth</a>
  &#8226;   <a href="#astropy.constants.R_sun">astropy.constants.R_sun</a>
+ &#8226;   <a href="#astropy.constants.astropyconst20">astropy.constants.astropyconst20</a>
  &#8226;   <a href="#astropy.constants.b_wien">astropy.constants.b_wien</a>
  &#8226;   <a href="#astropy.constants.c">astropy.constants.c</a>
  &#8226;   <a href="#astropy.constants.cgs">astropy.constants.cgs</a>
- &#8226;   <a href="#astropy.constants.codata2014">astropy.constants.codata2014</a>
  &#8226;   <a href="#astropy.constants.codata2018">astropy.constants.codata2018</a>
  &#8226;   <a href="#astropy.constants.config">astropy.constants.config</a>
  &#8226;   <a href="#astropy.constants.constant">astropy.constants.constant</a>
@@ -4719,6 +4722,7 @@ imports:
  &#8226;   <a href="#astropy.constants.g0">astropy.constants.g0</a>
  &#8226;   <a href="#astropy.constants.h">astropy.constants.h</a>
  &#8226;   <a href="#astropy.constants.hbar">astropy.constants.hbar</a>
+ &#8226;   <a href="#astropy.constants.iau2015">astropy.constants.iau2015</a>
  &#8226;   <a href="#astropy.constants.si">astropy.constants.si</a>
  &#8226;   <a href="#astropy.constants.utils">astropy.constants.utils</a>
  &#8226;   <a href="#astropy.units">astropy.units</a>
@@ -4853,6 +4857,7 @@ imports:
   <div class="import">
 imported by:
     <a href="#astropy">astropy</a>
+ &#8226;   <a href="#astropy.constants">astropy.constants</a>
  &#8226;   <a href="#astropy.constants.tests.test_prior_version">astropy.constants.tests.test_prior_version</a>
 
   </div>
@@ -4963,7 +4968,6 @@ imports:
   <div class="import">
 imported by:
     <a href="#astropy">astropy</a>
- &#8226;   <a href="#astropy.constants">astropy.constants</a>
  &#8226;   <a href="#astropy.constants.astropyconst20">astropy.constants.astropyconst20</a>
  &#8226;   <a href="#astropy.cosmology.tests.test_cosmology">astropy.cosmology.tests.test_cosmology</a>
 
@@ -5129,6 +5133,7 @@ imports:
   <div class="import">
 imported by:
     <a href="#astropy">astropy</a>
+ &#8226;   <a href="#astropy.constants">astropy.constants</a>
  &#8226;   <a href="#astropy.constants.astropyconst20">astropy.constants.astropyconst20</a>
  &#8226;   <a href="#astropy.constants.astropyconst40">astropy.constants.astropyconst40</a>
 
@@ -11410,9 +11415,7 @@ imported by:
 imports:
     <a href="#astropy.io.fits">astropy.io.fits</a>
  &#8226;   <a href="#astropy.io.fits.scripts.fitscheck">astropy.io.fits.scripts.fitscheck</a>
- &#8226;   <a href="#astropy.io.fits.scripts.fitsdiff">astropy.io.fits.scripts.fitsdiff</a>
  &#8226;   <a href="#astropy.io.fits.scripts.fitsheader">astropy.io.fits.scripts.fitsheader</a>
- &#8226;   <a href="#astropy.io.fits.scripts.fitsinfo">astropy.io.fits.scripts.fitsinfo</a>
 
   </div>
   <div class="import">
@@ -11475,7 +11478,6 @@ imports:
   <div class="import">
 imported by:
     <a href="#astropy">astropy</a>
- &#8226;   <a href="#astropy.io.fits.scripts">astropy.io.fits.scripts</a>
  &#8226;   <a href="#astropy.io.fits.tests.test_fitsdiff">astropy.io.fits.tests.test_fitsdiff</a>
 
   </div>
@@ -11522,7 +11524,6 @@ imports:
   <div class="import">
 imported by:
     <a href="#astropy">astropy</a>
- &#8226;   <a href="#astropy.io.fits.scripts">astropy.io.fits.scripts</a>
  &#8226;   <a href="#astropy.io.fits.tests.test_fitsinfo">astropy.io.fits.tests.test_fitsinfo</a>
 
   </div>
@@ -16072,6 +16073,7 @@ imports:
     <a href="#astropy">astropy</a>
  &#8226;   <a href="#astropy.config">astropy.config</a>
  &#8226;   <a href="#astropy.nddata">astropy.nddata</a>
+ &#8226;   <a href="#astropy.nddata._testing">astropy.nddata._testing</a>
  &#8226;   <a href="#astropy.nddata.bitmask">astropy.nddata.bitmask</a>
  &#8226;   <a href="#astropy.nddata.ccddata">astropy.nddata.ccddata</a>
  &#8226;   <a href="#astropy.nddata.compat">astropy.nddata.compat</a>
@@ -16136,6 +16138,7 @@ imports:
   <div class="import">
 imported by:
     <a href="#astropy">astropy</a>
+ &#8226;   <a href="#astropy.nddata">astropy.nddata</a>
  &#8226;   <a href="#astropy.nddata.mixins.tests.test_ndarithmetic">astropy.nddata.mixins.tests.test_ndarithmetic</a>
  &#8226;   <a href="#astropy.nddata.mixins.tests.test_ndslicing">astropy.nddata.mixins.tests.test_ndslicing</a>
  &#8226;   <a href="#astropy.nddata.tests.test_ccddata">astropy.nddata.tests.test_ccddata</a>
@@ -18565,7 +18568,6 @@ imported by:
 <span class="moduletype">Package</span>  <div class="import">
 imports:
     <a href="#astropy.table">astropy.table</a>
- &#8226;   <a href="#astropy.table.scripts.showtable">astropy.table.scripts.showtable</a>
 
   </div>
   <div class="import">
@@ -18595,7 +18597,6 @@ imports:
   <div class="import">
 imported by:
     <a href="#astropy">astropy</a>
- &#8226;   <a href="#astropy.table.scripts">astropy.table.scripts</a>
  &#8226;   <a href="#astropy.table.tests.test_showtable">astropy.table.tests.test_showtable</a>
 
   </div>
@@ -19612,9 +19613,9 @@ imported by:
   <a target="code" href="///C:/python38/lib/site-packages/astropy/tests/plugins/display.py" type="text/plain"><tt>astropy.tests.plugins.display</tt></a>
 <span class="moduletype">SourceModule</span>  <div class="import">
 imports:
-    <a href="#'pytest_astropy_header.display'">'pytest_astropy_header.display'</a>
- &#8226;   <a href="#astropy.tests.plugins">astropy.tests.plugins</a>
+    <a href="#astropy.tests.plugins">astropy.tests.plugins</a>
  &#8226;   <a href="#astropy.utils.exceptions">astropy.utils.exceptions</a>
+ &#8226;   <a href="#pytest_astropy_header">pytest_astropy_header</a>
  &#8226;   <a href="#warnings">warnings</a>
 
   </div>
@@ -25118,6 +25119,7 @@ imported by:
 imports:
     <a href="#astropy.utils">astropy.utils</a>
  &#8226;   <a href="#astropy.utils.tests">astropy.utils.tests</a>
+ &#8226;   <a href="#astropy.utils.tests.test_progress_bar_func">astropy.utils.tests.test_progress_bar_func</a>
 
   </div>
   <div class="import">
@@ -25407,6 +25409,7 @@ imports:
   <div class="import">
 imported by:
     <a href="#astropy">astropy</a>
+ &#8226;   <a href="#astropy.utils.tests">astropy.utils.tests</a>
  &#8226;   <a href="#astropy.utils.tests.test_console">astropy.utils.tests.test_console</a>
 
   </div>
@@ -25496,6 +25499,7 @@ imports:
  &#8226;   <a href="#astropy.utils.xml._iterparser">astropy.utils.xml._iterparser</a>
  &#8226;   <a href="#astropy.utils.xml.check">astropy.utils.xml.check</a>
  &#8226;   <a href="#astropy.utils.xml.iterparser">astropy.utils.xml.iterparser</a>
+ &#8226;   <a href="#astropy.utils.xml.unescaper">astropy.utils.xml.unescaper</a>
  &#8226;   <a href="#astropy.utils.xml.validate">astropy.utils.xml.validate</a>
 
   </div>
@@ -25664,6 +25668,7 @@ imports:
 imported by:
     <a href="#astropy">astropy</a>
  &#8226;   <a href="#astropy.utils.tests.test_xml">astropy.utils.tests.test_xml</a>
+ &#8226;   <a href="#astropy.utils.xml">astropy.utils.xml</a>
 
   </div>
 
@@ -30772,6 +30777,22 @@ imported by:
 </div>
 
 <div class="node">
+  <a name="computations"></a>
+  <a target="code" href="///C:/Users/Magix/Documents/SIRI-Transits-2020/software/computations.py" type="text/plain"><tt>computations</tt></a>
+<span class="moduletype">SourceModule</span>  <div class="import">
+imports:
+    <a href="#numpy">numpy</a>
+
+  </div>
+  <div class="import">
+imported by:
+    <a href="#software.py">software.py</a>
+
+  </div>
+
+</div>
+
+<div class="node">
   <a name="concurrent"></a>
   <a target="code" href="///C:/python38/lib/concurrent/__init__.py" type="text/plain"><tt>concurrent</tt></a>
 <span class="moduletype">Package</span>  <div class="import">
@@ -31625,6 +31646,7 @@ imported by:
  &#8226;   <a href="#email.utils">email.utils</a>
  &#8226;   <a href="#http.cookiejar">http.cookiejar</a>
  &#8226;   <a href="#http.server">http.server</a>
+ &#8226;   <a href="#jiulian">jiulian</a>
  &#8226;   <a href="#matplotlib.axis">matplotlib.axis</a>
  &#8226;   <a href="#matplotlib.backends.backend_pdf">matplotlib.backends.backend_pdf</a>
  &#8226;   <a href="#matplotlib.backends.backend_ps">matplotlib.backends.backend_ps</a>
@@ -38743,6 +38765,23 @@ imported by:
 </div>
 
 <div class="node">
+  <a name="jiulian"></a>
+  <a target="code" href="///C:/Users/Magix/Documents/SIRI-Transits-2020/software/jiulian.py" type="text/plain"><tt>jiulian</tt></a>
+<span class="moduletype">SourceModule</span>  <div class="import">
+imports:
+    <a href="#datetime">datetime</a>
+ &#8226;   <a href="#math">math</a>
+
+  </div>
+  <div class="import">
+imported by:
+    <a href="#software.py">software.py</a>
+
+  </div>
+
+</div>
+
+<div class="node">
   <a name="jplephem"></a>
   <a target="code" href="" type="text/plain"><tt>jplephem</tt></a>
 <span class="moduletype">MissingModule</span>  <div class="import">
@@ -39577,6 +39616,7 @@ imported by:
  &#8226;   <a href="#dateutil.relativedelta">dateutil.relativedelta</a>
  &#8226;   <a href="#dateutil.rrule">dateutil.rrule</a>
  &#8226;   <a href="#fractions">fractions</a>
+ &#8226;   <a href="#jiulian">jiulian</a>
  &#8226;   <a href="#matplotlib.axes._axes">matplotlib.axes._axes</a>
  &#8226;   <a href="#matplotlib.axes._base">matplotlib.axes._base</a>
  &#8226;   <a href="#matplotlib.backends._backend_tk">matplotlib.backends._backend_tk</a>
@@ -46605,6 +46645,7 @@ imported by:
  &#8226;   <a href="#astropy.wcs.wcsapi.tests.test_sliced_low_level_wcs">astropy.wcs.wcsapi.tests.test_sliced_low_level_wcs</a>
  &#8226;   <a href="#astropy.wcs.wcsapi.tests.test_utils">astropy.wcs.wcsapi.tests.test_utils</a>
  &#8226;   <a href="#astropy.wcs.wcsapi.utils">astropy.wcs.wcsapi.utils</a>
+ &#8226;   <a href="#computations">computations</a>
  &#8226;   <a href="#matplotlib">matplotlib</a>
  &#8226;   <a href="#matplotlib._cm">matplotlib._cm</a>
  &#8226;   <a href="#matplotlib._constrained_layout">matplotlib._constrained_layout</a>
@@ -63649,7 +63690,7 @@ imported by:
   <a target="code" href="" type="text/plain"><tt>pytest_astropy_header</tt></a>
 <span class="moduletype">MissingModule</span>  <div class="import">
 imported by:
-    <a href="#astropy.conftest">astropy.conftest</a>
+    <a href="#astropy.tests.plugins.display">astropy.tests.plugins.display</a>
 
   </div>
 
@@ -78334,6 +78375,7 @@ imported by:
  &#8226;   <a href="#scipy.optimize.minpack">scipy.optimize.minpack</a>
  &#8226;   <a href="#setuptools._vendor.pyparsing">setuptools._vendor.pyparsing</a>
  &#8226;   <a href="#socketserver">socketserver</a>
+ &#8226;   <a href="#software.py">software.py</a>
  &#8226;   <a href="#subprocess">subprocess</a>
  &#8226;   <a href="#test.support">test.support</a>
  &#8226;   <a href="#trace">trace</a>
@@ -79088,6 +79130,7 @@ imports:
  &#8226;   <a href="#unittest.case">unittest.case</a>
  &#8226;   <a href="#unittest.loader">unittest.loader</a>
  &#8226;   <a href="#unittest.main">unittest.main</a>
+ &#8226;   <a href="#unittest.mock">unittest.mock</a>
  &#8226;   <a href="#unittest.result">unittest.result</a>
  &#8226;   <a href="#unittest.runner">unittest.runner</a>
  &#8226;   <a href="#unittest.signals">unittest.signals</a>
@@ -79254,6 +79297,7 @@ imported by:
  &#8226;   <a href="#astropy.timeseries.io.tests.test_kepler">astropy.timeseries.io.tests.test_kepler</a>
  &#8226;   <a href="#astropy.utils.tests.test_introspection">astropy.utils.tests.test_introspection</a>
  &#8226;   <a href="#astropy.visualization.wcsaxes.tests.test_coordinate_helpers">astropy.visualization.wcsaxes.tests.test_coordinate_helpers</a>
+ &#8226;   <a href="#unittest">unittest</a>
 
   </div>
 
