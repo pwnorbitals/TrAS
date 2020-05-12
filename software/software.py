@@ -350,7 +350,7 @@ class ApplicationWindow(QtWidgets.QMainWindow):
     def GroupResult(self):
         # Menu deroulant
         self.MenuS = QComboBox(self)
-        self.MenuS.currentTextChanged.connect(self.RefStarChanged)
+        self.MenuS.textActivated.connect(self.RefStarChanged)
         
         labelMenuS = QtWidgets.QLabel()
         labelMenuS.setText("Reference Star")
@@ -574,11 +574,12 @@ class ApplicationWindow(QtWidgets.QMainWindow):
             self.MenuD.addItems(names)
         
     def ChoiceOfStar(self):
+        self.MenuS.clear()
         self.MenuS.addItems(self.ListRefStar)
         
        
     def RefStarChanged(self):
-        self.Y = self.MenuS.currentText()
+        self.Y = str(self.MenuS.currentText())
         self.compute_figures()
 
     def importSelection(self):

@@ -1,4 +1,5 @@
-__pyccache__
-.vscode
-software/build
-software/dist
+__pyccache__/
+.vscode/
+software/build/
+software/dist/
+software/__pycache__/
