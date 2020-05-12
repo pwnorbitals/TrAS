@@ -374,7 +374,7 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         labelInfosA.setText('Change boundary values from left and right :')
 
         tuto1 = "The K coefficient characterize the time's interval used for error calculation.\nIncrease K implies less approximation segments."
-        tuto2 = "\n\nThe s coefficient is the number of samples used to smooth the data."
+        tuto2 = "\n\nThe s coefficient is the number of samples used to smooth the data.\n\n\n"
         labeltuto = QLabel(tuto1+tuto2)
 
         self.labelInfoP = QtWidgets.QLabel()
@@ -458,12 +458,17 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         GridResult.addWidget(self.StarLabel, 3,0)
         GridResult.addWidget(self.LC, 2,1)
         GridResult.addWidget(self.Other, 3,1)
-
+        
+        groupBoxCalculations = QGroupBox('Calculations')
+        calbox = QVBoxLayout()
+        calbox.addLayout(GridResult)
+        calbox.addStretch(1)
+        groupBoxCalculations.setLayout(calbox)
+        
         groupBoxResult = QGroupBox('Results')
         vbox = QVBoxLayout()
         vbox.addWidget(labelMenuS)
         vbox.addWidget(self.MenuS)
-        vbox.addLayout(GridResult)
         vbox.addWidget(self.labelInfosK)
         vbox.addWidget(sliderK)
         vbox.addWidget(self.labelInfosS)
@@ -473,6 +478,7 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         vbox.addWidget(labelInfosA)
         vbox.addLayout(hbox)
         vbox.addWidget(labeltuto)
+        vbox.addWidget(groupBoxCalculations)
         vbox.addStretch(1)
         groupBoxResult.setLayout(vbox)       
         
