@@ -10,7 +10,6 @@ import jiulian as jd
 import computations as comp
 matplotlib.use('Qt5Agg')
 
-
 from PyQt5.QtSql import QSqlTableModel
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtCore import Qt, pyqtSlot
@@ -33,10 +32,6 @@ from matplotlib.widgets import Slider
 from math import floor
 
 from scipy.ndimage import gaussian_filter1d
-
-
-
-
 
 
 
@@ -85,7 +80,7 @@ class CustomDialog(QDialog):
         self.buttonBox.accepted.connect(self.accept)
         self.buttonBox.rejected.connect(self.reject)
 
-        self.label = QLabel("Built by Chris de CLAVERIE, Magdalena CALKA and William BOITIER!\nIPSA CIRI Exoplanet Transits 2020")
+        self.label = QLabel("Built by Chris de CLAVERIE, Magdalena CALKA and William BOITIER!\n\nIPSA CIRI Exoplanet Transits 2020")
 
         self.layout = QVBoxLayout()
         self.layout.addWidget(self.label)
