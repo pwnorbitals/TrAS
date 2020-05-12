@@ -44,17 +44,8 @@ service = pyvo.dal.TAPService("http://voparis-tap-planeto.obspm.fr/tap")
 
 def getInfo(name):
     query = "SELECT * FROM exoplanet.epn_core WHERE target_name ILIKE '%"+name+"%'"
-    try:
-         results = service.search(query)
-         return results
-    except Exception as e:
-        msg = QMessageBox()
-        msg.setIcon(QMessageBox.Critical)
-        msg.setText("Could not fetch the data")
-        msg.setInformativeText("An error occurred when trying to fetch catalog data.\n\nException : " + str(e))
-        msg.setWindowTitle("Catalog error")
-        msg.setStandardButtons(QMessageBox.Ok)
-        msg.exec_()
+    results = service.search(query)
+    return results
     
 def windowAround(arr, pos, halfsize):
     start = 0
@@ -70,15 +61,6 @@ def windowAround(arr, pos, halfsize):
         end = pos + halfsize
 
     return arr[start:end]
-
-
-def getVal(i, arr) :
-    if i <= 0:
-        return arr[0]
-    if i >= len(arr):
-        return arr[-1]
-    else:
-        return arr[i]
 
 def smooth(inlist, param):
     return gaussian_filter1d(inlist, param)
@@ -587,13 +569,22 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         if(len(self.searchval) < 3):
             print("NO")
             return
+        threading.Thread(target=self.doResearch).start()
+        self.buttonS.setText("Search (loading)")
         
-        self.results = getInfo(self.searchval)
-        if self.results:
-            names = [i.get('target_name').decode("utf-8")  for i in self.results]
-            self.labelMenuD.setText("Result choice ("+str(len(self.results))+" results): ")
-            self.MenuD.clear()
-            self.MenuD.addItems(names)
+    
+    def doResearch(self):
+        try:
+            self.results = getInfo(self.searchval)
+            self.buttonS.setText("Search")
+            if self.results:
+                names = [i.get('target_name').decode("utf-8")  for i in self.results]
+                self.labelMenuD.setText("Result choice ("+str(len(self.results))+" results): ")
+                self.MenuD.clear()
+                self.MenuD.addItems(names)
+        except Exception as e:
+            self.buttonS.setText("Search (failed)")
+            
         
     def ChoiceOfStar(self):
         self.MenuS.clear()
