@@ -106,6 +106,7 @@ class Canvas(FigureCanvas):
 
 class ApplicationWindow(QtWidgets.QMainWindow):
     def __init__(self):
+        
         QtWidgets.QMainWindow.__init__(self)
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
         self.setWindowTitle("application main window")
@@ -143,6 +144,8 @@ class ApplicationWindow(QtWidgets.QMainWindow):
 
         self.Star_Radius = 1.0
         self.Period = 1.0
+
+        self.Y="V-C"
         
     def About(self):
         dlg = CustomDialog(self)
@@ -175,11 +178,15 @@ class ApplicationWindow(QtWidgets.QMainWindow):
 
         lines = self.lines
         header = lines[0]
+
+        self.ListRefStar = comp.Header(header)
+        self.ChoiceOfStar()
+        
         meta = lines[1]
-        data = np.array([x for x in lines[2:] if x[header.index("V-C")] != "99.99999"]).T
+        data = np.array([x for x in lines[2:] if x[header.index(self.Y)] != "99.99999"]).T
 
         JDHEL = data[header.index("JDHEL")]
-        VC = data[header.index("V-C")]
+        VC = data[header.index(self.Y)]
         VC = [-1 * float(d) for d in VC]
         #HELCOR= data[header.index("HELCOR")]
         dates = [jd.from_jd(float(mjd), fmt='jd') for mjd in JDHEL]
@@ -342,15 +349,11 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         
     def GroupResult(self):
         # Menu deroulant
-        self.MenuD = QComboBox(self)
-        model = QSqlTableModel(self)
-        model.setTable("Reference_Star")
-        model.select()
-
-        self.MenuD.setModel(model)
-        self.MenuD.setModelColumn(1)
-        labelMenuD = QtWidgets.QLabel()
-        labelMenuD.setText("Reference Star")
+        self.MenuS = QComboBox(self)
+        self.MenuS.currentTextChanged.connect(self.RefStarChanged)
+        
+        labelMenuS = QtWidgets.QLabel()
+        labelMenuS.setText("Reference Star")
 
         labelRadius = QtWidgets.QLabel()
         labelRadius.setText("Enter the Star's radius (solar radius):")
@@ -458,8 +461,8 @@ class ApplicationWindow(QtWidgets.QMainWindow):
 
         groupBoxResult = QGroupBox('Results')
         vbox = QVBoxLayout()
-        vbox.addWidget(labelMenuD)
-        vbox.addWidget(self.MenuD)
+        vbox.addWidget(labelMenuS)
+        vbox.addWidget(self.MenuS)
         vbox.addLayout(GridResult)
         vbox.addWidget(self.labelInfosK)
         vbox.addWidget(sliderK)
@@ -570,8 +573,13 @@ class ApplicationWindow(QtWidgets.QMainWindow):
             self.MenuD.clear()
             self.MenuD.addItems(names)
         
+    def ChoiceOfStar(self):
+        self.MenuS.addItems(self.ListRefStar)
         
        
+    def RefStarChanged(self):
+        self.Y = self.MenuS.currentText()
+        self.compute_figures()
 
     def importSelection(self):
         index = self.MenuD.currentIndex()

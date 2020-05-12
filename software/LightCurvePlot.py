@@ -93,7 +93,8 @@ def Cases_z_p(z, p):
 
 
 def Theoretical_LC(Depth, Rstar, limbcoef, Tin, Tend, Te, Period, a, b, incli):
-
+    """ Period, Tin, Tend and Te must have the same unit
+    Hours or days are the best option has we take a step of 0.001"""
     p = sqrt(Depth)
     w = 2*pi/Period
     W_vec = W_limbcoefficient(limbcoef)

@@ -1,5 +1,12 @@
 import numpy as np
 
+def Header(head):
+    Y = list()
+    for i in head:
+        if(i.find('-')!=-1):
+            Y.append(i)
+    return Y
+
 def Find_tftt(T, kp, Y):
     mean = sum(Y)/len(Y)
     Up_1 = 0
