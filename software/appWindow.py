@@ -10,18 +10,15 @@ import jiulian as jd
 import computations as comp
 matplotlib.use('Qt5Agg')
 
-from PyQt5.QtSql import QSqlTableModel
-from PyQt5 import QtCore, QtWidgets
+from PyQt5 import QtWidgets
 from PyQt5.QtCore import Qt, pyqtSlot
 from PyQt5.QtWidgets import (QWidget, QLabel, QLineEdit, 
     QTextEdit, QGridLayout, QApplication, QGroupBox, QVBoxLayout, QWidget, QSlider, QFileDialog, QDialog, QDialogButtonBox,
     QTableView, QComboBox, QPushButton, QMessageBox, QFormLayout)
 from PyQt5.QtGui import QDoubleValidator
+from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 
 from numpy import arange, sin, pi, std
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
-from matplotlib.figure import Figure
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -32,8 +29,11 @@ import matplotlib as mpl
 from matplotlib.widgets import Slider
 from math import floor
 
-from scipy.ndimage import gaussian_filter1d
+import aboutDialog
+import settingsDialog
+import canvas
 
+from scipy.ndimage import gaussian_filter1d
 
 plt.style.use('ggplot')
 plt.rcParams["font.size"] = 6
@@ -67,97 +67,21 @@ def smooth(inlist, param):
 
 
 
-class AboutDialog(QDialog):
-    def __init__(self, *args, **kwargs):
-        super(AboutDialog, self).__init__(*args, **kwargs)
-        
-        self.setWindowTitle("About")
-        
-        QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
-        
-        self.buttonBox = QDialogButtonBox(QBtn)
-        self.buttonBox.accepted.connect(self.accept)
-        self.buttonBox.rejected.connect(self.reject)
-
-        self.label = QLabel("Built by Chris de CLAVERIE, Magdalena CALKA and William BOITIER!\n\nIPSA CIRI Exoplanet Transits 2020")
-
-        self.layout = QVBoxLayout()
-        self.layout.addWidget(self.label)
-        self.layout.addWidget(self.buttonBox)
-        self.setLayout(self.layout)
-
-class SettingsDialog(QDialog):
-    def __init__(self, *args, **kwargs):
-        super(SettingsDialog, self).__init__(*args, **kwargs)
-        
-        self.setWindowTitle("Settings")
-        
-        QBtn = QDialogButtonBox.Ok | QDialogButtonBox.Cancel
-
-        buttonBox = QDialogButtonBox(QBtn)
-        buttonBox.accepted.connect(self.accept)
-        buttonBox.rejected.connect(self.reject)
-
-        unitsBox = QGroupBox("Units")
-        unitsLayout = QFormLayout()
-        unitsBox.setLayout(unitsLayout)
-
-        lengthLabel = QLabel("Length unit : ")
-        lengthBox = QComboBox()
-        lengthBox.addItems(["Kilometer (km)", "Jupiter radius (RJ)", "Sun radius (RS)", "Astronomical unit (AU)"])
-        unitsLayout.addRow(lengthLabel, lengthBox)
-
-        massLabel = QLabel("Mass unit : ")
-        massBox = QComboBox()
-        massBox.addItems(["Kilogram (kg)", "Tonnes (T)", "Jupiter mass (MJ)", "Sun mass (MS)"])
-        unitsLayout.addRow(massLabel, massBox)
-
-        timeLabel = QLabel("Time unit : ")
-        timeBox = QComboBox()
-        timeBox.addItems(["Second (s)", "Day", "Year"])
-        unitsLayout.addRow(timeLabel, timeBox)
-
-        angleLabel = QLabel("Angles unit : ")
-        angleBox = QComboBox()
-        angleBox.addItems(["Radians (rad)", "Regrees (deg)"])
-        unitsLayout.addRow(angleLabel, angleBox)
-
-        layout = QVBoxLayout()
-        layout.addWidget(unitsBox)
-        layout.addWidget(buttonBox)
-        self.setLayout(layout)
-
-
-class Canvas(FigureCanvas):
-    def __init__(self, parent=None, width=5, height=4, dpi=100):
-        fig = Figure(figsize=(width, height), dpi=dpi, facecolor="#f0f0f0")
-        self.fig = fig
-        self.axes = fig.add_subplot(111)
-        super(Canvas, self).__init__(fig)
-
-        FigureCanvas.__init__(self, fig)
-        self.setParent(parent)
-
-        FigureCanvas.setSizePolicy(self,
-                                   QtWidgets.QSizePolicy.Expanding,
-                                   QtWidgets.QSizePolicy.Expanding)
-        FigureCanvas.updateGeometry(self)
-
 
 class ApplicationWindow(QtWidgets.QMainWindow):
     def __init__(self):
         
         QtWidgets.QMainWindow.__init__(self)
-        self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
+        self.setAttribute(Qt.WA_DeleteOnClose)
         self.setWindowTitle("application main window")
 
         self.file_menu = QtWidgets.QMenu('&File', self)
         self.file_menu.addAction('&Open', self.openFile,
-                                 QtCore.Qt.CTRL + QtCore.Qt.Key_O)
+                                 Qt.CTRL + Qt.Key_O)
         self.file_menu.addAction('&Settings', self.openSettings,
-                                 QtCore.Qt.CTRL + QtCore.Qt.Key_U)
+                                 Qt.CTRL + Qt.Key_U)
         self.file_menu.addAction('&Quit', self.fileQuit,
-                                 QtCore.Qt.CTRL + QtCore.Qt.Key_Q)
+                                 Qt.CTRL +Qt.Key_Q)
         self.menuBar().addMenu(self.file_menu)
 
         self.help_menu = QtWidgets.QMenu('&Help', self)
@@ -190,13 +114,13 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         self.Y="V-C"
         
     def About(self):
-        dlg = AboutDialog(self)
+        dlg = aboutDialog.AboutDialog(self)
         dlg.exec_()
 
     def openFile(self):
         file = QFileDialog.getOpenFileName(self, 'Open File')
         if file[0]:
-            aw.setWindowTitle("%s [%s]" % (progname, file[0]))
+            self.setWindowTitle("%s [%s]" % (progname, file[0]))
             # Parse file
             file = open(file[0], 'r')
             lines = file.readlines()
@@ -214,7 +138,7 @@ class ApplicationWindow(QtWidgets.QMainWindow):
                 msg.exec_()
 
     def openSettings(self):
-        dlg = SettingsDialog(self)
+        dlg = settingsDialog.SettingsDialog(self)
         dlg.exec_()
 
     def parseData(self):
@@ -370,9 +294,9 @@ class ApplicationWindow(QtWidgets.QMainWindow):
 
     def GroupGraph(self):
          #graphics and toolbars        
-        Rd = Canvas(self.main_widget, width=5, height=5, dpi=100)
+        Rd = canvas.Canvas(self.main_widget, width=5, height=5, dpi=100)
         self.dataCanvas = Rd
-        Cd = Canvas(self.main_widget, width=5, height=5, dpi=100)
+        Cd = canvas.Canvas(self.main_widget, width=5, height=5, dpi=100)
         self.errorCanvas = Cd
         toolbarRd = NavigationToolbar(Rd, self)
         toolbarCd = NavigationToolbar(Cd, self)
@@ -648,10 +572,3 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         self.Per_input.setText(str(entry.get('period')))
         print(entry.get('star_radius'), entry.get('period'))
 
-
-qApp = QtWidgets.QApplication(sys.argv)
-
-aw = ApplicationWindow()
-aw.setWindowTitle("%s" % progname)
-aw.show()
-sys.exit(qApp.exec_())
