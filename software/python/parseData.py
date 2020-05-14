@@ -153,10 +153,15 @@ def parseData(self):
 
             # Deduce parameters
         
-        #Conversion in km and in seconds
-        Sun_rad = 695700
-        R_s = self.Star_Radius * Sun_rad
-        Period = self.Period * 86400
+        #Conversion parameters for output
+        l = self.conversion[0]
+        m = self.conversion[1]
+        t = self.conversion[2]
+        a = self.conversion[3]
+
+        # Convert input to km and second
+        R_s = self.Star_Radius / l
+        Period = self.Period / t
 
         Depth, sintt, sintf, Tot, full, midtime = comp.Param(R_s, Period, timestamps, boundaries, mag)
         imp_b = comp.Impact_parameter(sintt, sintf, Depth)
@@ -167,10 +172,14 @@ def parseData(self):
         M_star = comp.Star_mass(R_s, Star_d)
         M_planet = comp.Planet_mass(M_star, Period, Semi_a)
 
-        planet = "Planet radius : %.5E (km)" % R_p + "\nPlanet mass : %.3E (kg)" % M_planet
-        star = "Star density : %.5E" % Star_d + "\nStar mass : %.3E (kg)" % M_star
-        other = "Impact parameter b : %.5E" % imp_b + "\nSemi-major a : %.5E (km)" % Semi_a + "\nInclinaison : %.3f °" % alpha
-        lightcurve = "Depth : %.3f" % Depth + "\nTotal duration : %.3E" % Tot + "\nFull duration : %.3E" % full
+        # Update Label
+        planet = "Planet radius : {0:.5E} {1} \nPlanet mass : {2:.3E} {3}".format((R_p*l), self.str_conv[0], (M_planet*m), self.str_conv[1])
+        star = "Star density : {0:.5E} kg/m3 \nStar mass : {1:.3E} {2}".format(Star_d, (M_star*m), self.str_conv[1])
+        other = "Impact parameter b : {0:.5E} \nSemi-major a : {1:.5E} {2} \nInclinaison : {3:.3f} {4}".format(imp_b, (Semi_a*l), self.str_conv[0], (alpha*a), self.str_conv[3])
+        lightcurve = "Depth : {0:.3f} \nTotal duration : {1:.3E} {2} \nFull Duration : {3:.3E} {4}".format(Depth, (Tot*t), self.str_conv[2], (full*t), self.str_conv[2])
+
+        self.labelRadius.setText("Enter the Star's radius (%s):"% self.str_conv[0])
+        self.labelPeriod.setText("Enter the Period of orbit (%s):"% self.str_conv[2])
 
         self.PlanetLabel.setText(planet)
         self.StarLabel.setText(star)
@@ -181,7 +190,7 @@ def parseData(self):
         self.labelInfosS.setText('Change the s coefficient : %i' % self.ss.value())
 
         # LIGHT CURVE PLOTTING  
-        flux = LCP.Theoretical_LC(Depth, R_s, timestamps, midtime, Period, Semi_a, imp_b, alpha)
+        flux = LCP.Theoretical_LC(Depth, R_s, timestamps, midtime, Period, Semi_a, imp_b)
         Norm = 1-comp.NormalizedMag(mag)
 
         self.theoricCanvas.axes.clear()

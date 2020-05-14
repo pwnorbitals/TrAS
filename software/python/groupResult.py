@@ -15,11 +15,11 @@ def GroupResult(self):
         labelMenuS = QLabel()
         labelMenuS.setText("Reference Star")
 
-        labelRadius = QLabel()
-        labelRadius.setText("Enter the Star's radius (solar radius):")
+        self.labelRadius = QLabel()
+        self.labelRadius.setText("Enter the Star's radius (%s):"% self.str_conv[0])
 
-        labelPeriod = QLabel()
-        labelPeriod.setText("Enter the Period of orbit (days):")
+        self.labelPeriod = QLabel()
+        self.labelPeriod.setText("Enter the Period of orbit (%s):"%self.str_conv[2])
 
         self.PlanetLabel = QLabel('Planet radius : \nPlanet mass : ')
         self.StarLabel = QLabel('Star density : \nStar mass : ')
@@ -103,9 +103,9 @@ def GroupResult(self):
 
         GridResult = QGridLayout()
         #User Input
-        GridResult.addWidget(labelRadius, 0,0)
+        GridResult.addWidget(self.labelRadius, 0,0)
         GridResult.addWidget(self.RS_input, 1,0)
-        GridResult.addWidget(labelPeriod, 0,1)
+        GridResult.addWidget(self.labelPeriod, 0,1)
         GridResult.addWidget(self.Per_input, 1,1)
         
         #Deduced Parameter

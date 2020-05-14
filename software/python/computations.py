@@ -1,5 +1,5 @@
 import numpy as np
-
+from numpy import pi
 def Header(head):
     Y = list()
     for i in head:
@@ -85,7 +85,7 @@ def Inclinaison(R_star, a, b):
     impact parameter b
     """
     i = np.arccos(R_star*b/a)
-    return i*180/np.pi
+    return i
 
 def Planet_radius(R_star, Depth):
     Rp = R_star*np.sqrt(Depth)
@@ -108,3 +108,51 @@ def Planet_mass(M_star, Period, a):
     G = 6.67430 * np.float_power(10, -17)
     M_planet = abs((4 * np.float_power(np.pi, 2) * np.float_power(a, 3))/(G * np.float_power(Period, 2)) - M_star)
     return M_planet
+
+def Conversion(str_c):
+    # From km to ...
+    Cv_l = {
+        "Kilometer (km)": 1,
+        "Jupiter radius (RJ)": 1/66864,
+        "Sun radius (RS)": 1/696342,
+        "Astronomical unit (AU)": 1/149597870
+    }
+    # From kg to ...
+    Cv_m = {
+        "Kilogram (kg)": 1,
+        "Tonnes (T)": 1/1e3,
+        "Jupiter mass (MJ)": 1/(1.8986e27),
+        "Sun mass (MS)": 1/(1.9884e30)
+    }
+    # From second to ...
+    Cv_t = {
+        "Second (s)": 1,
+        "Day": 1/86400,
+        "Year": 1/(86400*365)
+    }
+    # From radian to ...
+    Cv_a = {
+        "Radians (rad)": 1,
+        "Degrees (deg)": 180/pi
+    }
+    return [Cv_l.get(str_c[0], 1),Cv_m.get(str_c[1], 1),Cv_t.get(str_c[2], 1),Cv_a.get(str_c[3], 1)]
+
+def Update_str(str_c):
+    #length
+    str_l = str_c[0][-3:-1]
+    #mass
+    if str_c[1]=="Tonnes (T)":
+        str_m = str_c[1][-2:-1]
+    else:
+        str_m = str_c[1][-3:-1]
+    #time
+    if str_c[2]=="Second (s)":
+        str_t = str_c[2][-2:-1]
+    elif str_c[2]=="Day":
+        str_t = str_c[2][-3:]
+    else:
+        str_t = str_c[2][-4:]
+    #angle
+    str_a = str_c[3][-4:-1]
+
+    return [str_l, str_m, str_t, str_a]

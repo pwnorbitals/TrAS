@@ -112,7 +112,7 @@ def Cases_z_p(z, p):
         return 11
 
 
-def Theoretical_LC(Depth, Rstar, time, Te, Period, a, b, incli, limbcoef=[0,0]):
+def Theoretical_LC(Depth, Rstar, time, Te, Period, a, b, limbcoef=[0,0]):
     """ Period, time and Te must have the same unit
     Hours or days are the best option has we take a step of 0.001"""
     p = sqrt(Depth)

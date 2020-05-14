@@ -24,6 +24,7 @@ import canvas
 import parseData
 import groupResult
 import groupDatabase
+import computations
 
 # Settings
 matplotlib.use('Qt5Agg')
@@ -37,6 +38,10 @@ mpl.rcParams['toolbar'] = 'None'
 class ApplicationWindow(QtWidgets.QMainWindow):
     def __init__(self):
         
+        # Conversion set [km,kg,second,rad]
+        self.str_conv = ['km','kg','seconds','radians']
+        self.conversion = [1,1,1,1]
+
         QtWidgets.QMainWindow.__init__(self)
         self.setAttribute(Qt.WA_DeleteOnClose)
         self.setWindowTitle("application main window")
@@ -104,7 +109,10 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         dlg = settingsDialog.SettingsDialog(self)
         dlg.exec_()
         if dlg.result() == 0:
-            self.length, self.time, self.mass, self.angle = dlg.accept()
+            str_c = dlg.accept()
+            self.conversion = computations.Conversion(str_c)
+            self.str_conv = computations.Update_str(str_c)
+            self.compute_figures()
 
     def GroupGraph(self):
          #graphics and toolbars        
