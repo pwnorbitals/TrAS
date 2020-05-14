@@ -182,10 +182,12 @@ def parseData(self):
 
         # LIGHT CURVE PLOTTING  
         flux = LCP.Theoretical_LC(Depth, R_s, timestamps, midtime, Period, Semi_a, imp_b, alpha)
-        
+        Norm = 1-comp.NormalizedMag(mag)
+
         self.theoricCanvas.axes.clear()
         self.theoricCanvas.axes.set_title('Analytical Light Curve')
         self.theoricCanvas.axes.plot(timestamps, flux, linewidth=1.0)
+        self.theoricCanvas.axes.plot(timestamps, [float(d)+Norm for d in VC], linewidth=1.0)
 
         self.theoricCanvas.fig.canvas.draw()
         self.theoricCanvas.fig.canvas.flush_events()

@@ -7,6 +7,17 @@ def Header(head):
             Y.append(i)
     return Y
 
+def NormalizedMag(Y):
+    mean = sum(Y)/len(Y)
+    
+    Norm = 0
+    nb = 0
+    for i in Y:
+        if i>mean:
+            nb += 1
+            Norm += i
+    return Norm/nb
+
 def Find_tftt(T, kp, Y):
     mean = sum(Y)/len(Y)
     Up_1 = 0
@@ -41,9 +52,8 @@ def Param(R_star, Period, time, k_ps, Y):
     """
     # Light curve data
     T_t, T_f, tE = Find_tftt(time, k_ps, Y)
-    Depth = abs(max(Y) - min(Y))
-    print("\t",T_t)
-    print("\t",T_f)
+    Depth = NormalizedMag(Y)-min(Y)
+    
     # Impact parameter b
     sinT_t = np.float_power( np.sin(T_t * np.pi/Period), 2) 
     sinT_f = np.float_power( np.sin(T_f * np.pi/Period), 2)

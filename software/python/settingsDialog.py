@@ -33,10 +33,12 @@ class SettingsDialog(QDialog):
 
         angleLabel = QLabel("Angles unit : ")
         angleBox = QComboBox()
-        angleBox.addItems(["Radians (rad)", "Regrees (deg)"])
+        angleBox.addItems(["Radians (rad)", "Degrees (deg)"])
         unitsLayout.addRow(angleLabel, angleBox)
 
         layout = QVBoxLayout()
         layout.addWidget(unitsBox)
         layout.addWidget(buttonBox)
         self.setLayout(layout)
+
+    def accept(self):

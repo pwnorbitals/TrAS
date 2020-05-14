@@ -103,6 +103,8 @@ class ApplicationWindow(QtWidgets.QMainWindow):
     def openSettings(self):
         dlg = settingsDialog.SettingsDialog(self)
         dlg.exec_()
+        if dlg.result() == 0:
+            self.length, self.time, self.mass, self.angle = dlg.accept()
 
     def GroupGraph(self):
          #graphics and toolbars        
