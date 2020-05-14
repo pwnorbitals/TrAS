@@ -4,16 +4,12 @@ import sys
 import os
 import random
 import matplotlib
-import pyvo
 import math
-import threading
 
 # PyQT
 from PyQt5.QtCore import Qt
 from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import (QLabel, QLineEdit, 
-    QGridLayout, QGroupBox, QVBoxLayout, QSlider, QFileDialog, 
-    QComboBox, QPushButton, QMessageBox)
+from PyQt5.QtWidgets import QLabel, QGridLayout, QGroupBox, QVBoxLayout, QLineEdit, QPushButton, QComboBox, QFileDialog
 
 
 # Matplotlib
@@ -27,24 +23,15 @@ import settingsDialog
 import canvas
 import parseData
 import groupResult
+import groupDatabase
 
 # Settings
 matplotlib.use('Qt5Agg')
 plt.style.use('ggplot')
 plt.rcParams["font.size"] = 6
 mpl.rcParams['toolbar'] = 'None'
-progname = os.path.basename(sys.argv[0])
-service = pyvo.dal.TAPService("http://voparis-tap-planeto.obspm.fr/tap")
 
-
-# Helper functions
-    # Retrieve data from exoplanet.eu
-def getInfo(name):
-    query = "SELECT * FROM exoplanet.epn_core WHERE target_name ILIKE '%"+name+"%'"
-    results = service.search(query)
-    return results
-    
-
+   
 
 # Main application window
 class ApplicationWindow(QtWidgets.QMainWindow):
@@ -80,7 +67,7 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         grid = QGridLayout(self.main_widget)
         grid.addWidget(self.GroupGraph(), 0,0)
         grid.addLayout(groupResult.GroupResult(self),0,1)
-        grid.addWidget(self.GroupDataBase(),0,2)
+        grid.addWidget(groupDatabase.GroupDataBase(self),0,2)
         grid.setSpacing(10)
 
         self.Star_Radius = 1.0
@@ -95,7 +82,7 @@ class ApplicationWindow(QtWidgets.QMainWindow):
     def openFile(self):
         file = QFileDialog.getOpenFileName(self, 'Open File')
         if file[0]:
-            self.setWindowTitle("%s [%s]" % (progname, file[0]))
+            self.setWindowTitle("%s [%s]" % (os.path.basename(sys.argv[0]), file[0]))
             # Parse file
             file = open(file[0], 'r')
             lines = file.readlines()
@@ -135,43 +122,6 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         groupBoxGraph.setLayout(vbox)       
         
         return groupBoxGraph
-    
-    def GroupDataBase(self):
-        labelName = QtWidgets.QLabel()
-        labelName.setText("Exoplanet Name:          ")
-
-        self.NP_input = QLineEdit()
-        self.NP_input.returnPressed.connect(self.onResearchClick)
-
-        self.buttonS = QPushButton('Search', self)
-        self.buttonS.setToolTip('Search')
-        self.buttonS.clicked.connect(self.onResearchClick)
-
-        self.MenuD = QComboBox(self)
-
-        self.labelMenuD = QtWidgets.QLabel()
-        self.labelMenuD.setText("Result choice : ")
-
-        self.buttonImport = QPushButton('Import', self)
-        self.buttonImport.setToolTip('Import')
-        self.buttonImport.clicked.connect(self.importSelection)
-
-
-        groupBoxDataBase = QGroupBox('Import Data')
-        hbox = QVBoxLayout()
-        hbox.addWidget(labelName)
-        hbox.addWidget(self.NP_input)
-        hbox.addWidget(self.buttonS)
-        hbox.addWidget(self.labelMenuD)
-        hbox.addWidget(self.MenuD)
-        hbox.addWidget(self.buttonImport)
-
-        hbox.addStretch(1)
-        groupBoxDataBase.setLayout(hbox)
-
-
-
-        return groupBoxDataBase
 
     def fileQuit(self):
         self.close()
@@ -195,26 +145,6 @@ class ApplicationWindow(QtWidgets.QMainWindow):
             msg.setWindowTitle("Internal error")
             msg.setStandardButtons(QMessageBox.Ok)
             msg.exec_()
-        
-    def onResearchClick(self):
-        self.searchval = self.NP_input.text()
-        if(len(self.searchval) < 3):
-            print("NO")
-            return
-        threading.Thread(target=self.doResearch).start()
-        self.buttonS.setText("Search (loading)")
-        
-    def doResearch(self):
-        try:
-            self.results = getInfo(self.searchval)
-            self.buttonS.setText("Search")
-            if self.results:
-                names = [i.get('target_name').decode("utf-8")  for i in self.results]
-                self.labelMenuD.setText("Result choice ("+str(len(self.results))+" results): ")
-                self.MenuD.clear()
-                self.MenuD.addItems(names)
-        except Exception as e:
-            self.buttonS.setText("Search (failed)")
             
     def ChoiceOfStar(self):
         self.MenuS.clear()
@@ -224,10 +154,5 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         self.Y = str(self.MenuS.currentText())
         self.compute_figures()
 
-    def importSelection(self):
-        index = self.MenuD.currentIndex()
-        entry = self.results[index]
-        self.RS_input.setText(str(entry.get('star_radius')))
-        self.Per_input.setText(str(entry.get('period')))
-        print(entry.get('star_radius'), entry.get('period'))
+   
 
