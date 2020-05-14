@@ -60,7 +60,7 @@ def doResearch(self):
             self.MenuD.clear()
             self.MenuD.addItems(names)
     except Exception as e:
-        self.buttonS.setText("Search (failed)")
+        self.buttonS.setText("Search (failed : " + str(e) + ")")
 
 def importSelection(self):
     index = self.MenuD.currentIndex()

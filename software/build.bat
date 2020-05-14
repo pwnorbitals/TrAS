@@ -1,1 +1,1 @@
-pyinstaller software.py --noconfirm --noconsole --onefile --noupx --name ExoCIRI2020
+pyinstaller main.py --noconfirm --noconsole --onefile --noupx --name ExoCIRI2020
