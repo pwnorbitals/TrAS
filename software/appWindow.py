@@ -1,3 +1,4 @@
+# Basic packages
 from __future__ import unicode_literals
 import sys
 import os
@@ -6,35 +7,39 @@ import matplotlib
 import pyvo
 import math
 import threading
-import jiulian as jd
-import computations as comp
-matplotlib.use('Qt5Agg')
 
+# PyQT
 from PyQt5 import QtWidgets
-from PyQt5.QtCore import Qt, pyqtSlot
-from PyQt5.QtWidgets import (QWidget, QLabel, QLineEdit, 
-    QTextEdit, QGridLayout, QApplication, QGroupBox, QVBoxLayout, QWidget, QSlider, QFileDialog, QDialog, QDialogButtonBox,
-    QTableView, QComboBox, QPushButton, QMessageBox, QFormLayout)
+from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import (QLabel, QLineEdit, 
+    QGridLayout, QGroupBox, QVBoxLayout, QSlider, QFileDialog, 
+    QComboBox, QPushButton, QMessageBox)
 from PyQt5.QtGui import QDoubleValidator
-from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 
-from numpy import arange, sin, pi, std
-
+# Numpy, scipy, datetime
 import numpy as np
-import matplotlib.pyplot as plt
 from scipy.signal import find_peaks
 from scipy.stats import linregress
+from scipy.ndimage import gaussian_filter1d
 from datetime import datetime
-import matplotlib as mpl
-from matplotlib.widgets import Slider
-from math import floor
 
+# Matplotlib
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
+
+
+
+# Local files
+import jiulian as jd
 import aboutDialog
 import settingsDialog
 import canvas
+import computations as comp
 
-from scipy.ndimage import gaussian_filter1d
 
+# Settings
+matplotlib.use('Qt5Agg')
 plt.style.use('ggplot')
 plt.rcParams["font.size"] = 6
 mpl.rcParams['toolbar'] = 'None'
@@ -42,11 +47,14 @@ progname = os.path.basename(sys.argv[0])
 service = pyvo.dal.TAPService("http://voparis-tap-planeto.obspm.fr/tap")
 
 
+# Helper functions
+    # Retrieve data from exoplanet.eu
 def getInfo(name):
     query = "SELECT * FROM exoplanet.epn_core WHERE target_name ILIKE '%"+name+"%'"
     results = service.search(query)
     return results
     
+    # Extract part of an array around a position with a given size : arr[pos-halfsize, pos+halfsize]
 def windowAround(arr, pos, halfsize):
     start = 0
     if pos - halfsize < 0:
@@ -62,12 +70,11 @@ def windowAround(arr, pos, halfsize):
 
     return arr[start:end]
 
+    # Smooth an array with a given smoothing parameter (lower = less smoothing)
 def smooth(inlist, param):
     return gaussian_filter1d(inlist, param)
 
-
-
-
+# Main application window
 class ApplicationWindow(QtWidgets.QMainWindow):
     def __init__(self):
         
@@ -103,10 +110,6 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         grid.addLayout(self.GroupResult(),0,1)
         grid.addWidget(self.GroupDataBase(),0,2)
         grid.setSpacing(10)
-
-        self.k = 8
-        self.a = 0
-        self.b = 0
 
         self.Star_Radius = 1.0
         self.Period = 1.0
@@ -162,8 +165,8 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         timestamps_orig = [datetime.timestamp(i) for i in dates]
         timestamps = [i-timestamps_orig[0] for i in timestamps_orig]
 
-        a = self.a 
-        b = self.b
+        a = self.sa.value()
+        b = self.sb.value()
         JDHEL = JDHEL[a : -(b+1)]
         VC = VC[a : -(b+1)]
         timestamps = timestamps[a : -(b+1)]
@@ -180,8 +183,8 @@ class ApplicationWindow(QtWidgets.QMainWindow):
 
 
         # Compute tunable time parameter
-        nb_vals = int(self.k * resolution)
-        VC = smooth(VC, self.s)
+        nb_vals = int(self.sk.value() * resolution)
+        VC = smooth(VC, self.ss.value())
 
         #print([date.strftime("%b %d %Y %H:%M:%S") for date in dates])
         #print(VC)
@@ -194,7 +197,7 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         for i in range(len(VC)):
             #vals = [float(getVal(i + j, VC)) for j in range(-nb_vals, +nb_vals)]
             vals = windowAround(VC, i, nb_vals)
-            errors.append(std(vals))
+            errors.append(np.std(vals))
 
             #print(errors)
         errors_smoothed = smooth(errors, nb_vals)
@@ -203,7 +206,7 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         self.errorCanvas.axes.plot(timestamps, errors_smoothed, linewidth=1.0)
 
         # Find local maxima
-        peaks, properties = find_peaks(errors_smoothed, prominence=10**(-self.prominence))
+        peaks, properties = find_peaks(errors_smoothed, prominence=10**(-self.sp.value()))
         print("PEAKS : ", peaks)
         print("PEAKS Y : ", errors_smoothed[peaks])
 
@@ -291,7 +294,6 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         self.labelInfosK.setText('Change the K coefficient : %i  (note: coeff was calculated to be optimal)' % self.sk.value())
         self.labelInfosS.setText('Change the s coefficient : %i' % self.ss.value())
 
-
     def GroupGraph(self):
          #graphics and toolbars        
         Rd = canvas.Canvas(self.main_widget, width=5, height=5, dpi=100)
@@ -354,58 +356,53 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         self.Per_input.setValidator(self.validator)
         self.Per_input.returnPressed.connect(self.PeriodChanged)
 
-        self.s = 2
         sliderS = QSlider(Qt.Horizontal)
         sliderS.setFocusPolicy(Qt.StrongFocus)
         sliderS.setTickPosition(QSlider.TicksBothSides)
         sliderS.setTickInterval(10)
         sliderS.setSingleStep(1)
         sliderS.setMinimum(1)
-        sliderS.valueChanged.connect(self.changeS)
+        sliderS.valueChanged.connect(self.compute_figures)
         self.ss = sliderS
-        sliderS.setValue(self.s)
+        sliderS.setValue(2)
 
-        self.k = 8
         sliderK = QSlider(Qt.Horizontal)
         sliderK.setFocusPolicy(Qt.StrongFocus)
         sliderK.setTickPosition(QSlider.TicksBothSides)
         sliderK.setTickInterval(10)
         sliderK.setSingleStep(1)
         sliderK.setMinimum(2)
-        sliderK.valueChanged.connect(self.changeK)
+        sliderK.valueChanged.connect(self.compute_figures)
         self.sk = sliderK
-        sliderK.setValue(self.k)
+        sliderK.setValue(8)
 
-        self.prominence = 8
         sliderP = QSlider(Qt.Horizontal)
         sliderP.setFocusPolicy(Qt.StrongFocus)
         sliderP.setTickPosition(QSlider.TicksBothSides)
         sliderP.setTickInterval(10)
         sliderP.setSingleStep(1)
-        sliderP.valueChanged.connect(self.changeP)
+        sliderP.valueChanged.connect(self.compute_figures)
         self.sp = sliderP
-        sliderP.setValue(self.prominence)
+        sliderP.setValue(8)
 
-        self.a = 0
         sliderA = QSlider(Qt.Horizontal)
         sliderA.setFocusPolicy(Qt.StrongFocus)
         sliderA.setTickPosition(QSlider.TicksBothSides)
         sliderA.setTickInterval(10)
         sliderA.setSingleStep(1)
-        sliderA.valueChanged.connect(self.changeA)
+        sliderA.valueChanged.connect(self.compute_figures)
         self.sa = sliderA
-        sliderA.setValue(self.a)
+        sliderA.setValue(0)
 
-        self.b = 0
         sliderB = QSlider(Qt.Horizontal)
         sliderB.setFocusPolicy(Qt.StrongFocus)
         sliderB.setTickPosition(QSlider.TicksBothSides)
         sliderB.setTickInterval(10)
         sliderB.setSingleStep(1)
-        sliderB.valueChanged.connect(self.changeB)
+        sliderB.valueChanged.connect(self.compute_figures)
         sliderB.setInvertedAppearance(True)
         self.sb = sliderB
-        sliderB.setValue(self.b)
+        sliderB.setValue(0)
 
         hbox = QtWidgets.QHBoxLayout()
         hbox.addWidget(sliderA)
@@ -489,7 +486,6 @@ class ApplicationWindow(QtWidgets.QMainWindow):
 
         return groupBoxDataBase
 
-
     def fileQuit(self):
         self.close()
 
@@ -499,26 +495,6 @@ class ApplicationWindow(QtWidgets.QMainWindow):
 
     def PeriodChanged(self):
         self.Period = float(self.Per_input.text())
-        self.compute_figures()
-
-    def changeS(self):
-        self.s = self.ss.value()
-        self.compute_figures()
-
-    def changeA(self):
-        self.a = self.sa.value()
-        self.compute_figures()
-
-    def changeB(self):
-        self.b = self.sb.value()
-        self.compute_figures()
-
-    def changeK(self):
-        self.k = self.sk.value()
-        self.compute_figures()
-
-    def changeP(self):
-        self.p = self.sp.value()
         self.compute_figures()
 
     def compute_figures(self):
@@ -533,7 +509,6 @@ class ApplicationWindow(QtWidgets.QMainWindow):
             msg.setStandardButtons(QMessageBox.Ok)
             msg.exec_()
         
-    
     def onResearchClick(self):
         self.searchval = self.NP_input.text()
         if(len(self.searchval) < 3):
@@ -542,7 +517,6 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         threading.Thread(target=self.doResearch).start()
         self.buttonS.setText("Search (loading)")
         
-    
     def doResearch(self):
         try:
             self.results = getInfo(self.searchval)
@@ -555,11 +529,9 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         except Exception as e:
             self.buttonS.setText("Search (failed)")
             
-        
     def ChoiceOfStar(self):
         self.MenuS.clear()
         self.MenuS.addItems(self.ListRefStar)
-        
        
     def RefStarChanged(self):
         self.Y = str(self.MenuS.currentText())
