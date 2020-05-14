@@ -2,6 +2,7 @@ from datetime import datetime
 import numpy as np
 import computations as comp
 import jiulian as jd
+import LightCurvePlot as LCP
 
 
 # Numpy, scipy, datetime
@@ -157,7 +158,7 @@ def parseData(self):
         R_s = self.Star_Radius * Sun_rad
         Period = self.Period * 86400
 
-        Depth, sintt, sintf, Tot, full = comp.Param(R_s, Period, timestamps, boundaries, mag)
+        Depth, sintt, sintf, Tot, full, midtime = comp.Param(R_s, Period, timestamps, boundaries, mag)
         imp_b = comp.Impact_parameter(sintt, sintf, Depth)
         Semi_a = comp.Semimajor(R_s, sintt, Depth, imp_b)
         alpha = comp.Inclinaison(R_s, Semi_a, imp_b)
@@ -178,3 +179,13 @@ def parseData(self):
 
         self.labelInfosK.setText('Change the K coefficient : %i  (note: coeff was calculated to be optimal)' % self.sk.value())
         self.labelInfosS.setText('Change the s coefficient : %i' % self.ss.value())
+
+        # LIGHT CURVE PLOTTING  
+        flux = LCP.Theoretical_LC(Depth, R_s, timestamps, midtime, Period, Semi_a, imp_b, alpha)
+        
+        self.theoricCanvas.axes.clear()
+        self.theoricCanvas.axes.set_title('Analytical Light Curve')
+        self.theoricCanvas.axes.plot(timestamps, flux, linewidth=1.0)
+
+        self.theoricCanvas.fig.canvas.draw()
+        self.theoricCanvas.fig.canvas.flush_events()

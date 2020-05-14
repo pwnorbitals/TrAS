@@ -40,6 +40,7 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         QtWidgets.QMainWindow.__init__(self)
         self.setAttribute(Qt.WA_DeleteOnClose)
         self.setWindowTitle("application main window")
+        
 
         self.file_menu = QtWidgets.QMenu('&File', self)
         self.file_menu.addAction('&Open', self.openFile,

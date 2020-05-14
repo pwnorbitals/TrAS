@@ -3,6 +3,10 @@ from PyQt5.QtGui import QDoubleValidator
 from PyQt5.QtCore import Qt
 from PyQt5 import QtWidgets
 
+from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
+
+import canvas
+
 def GroupResult(self):
         # Menu deroulant
         self.MenuS = QComboBox(self)
@@ -109,11 +113,18 @@ def GroupResult(self):
         GridResult.addWidget(self.StarLabel, 3,0)
         GridResult.addWidget(self.LC, 2,1)
         GridResult.addWidget(self.Other, 3,1)
+
+        #Analytical light curve
+        Th = canvas.Canvas(self.main_widget, width=5, height=5, dpi=100)
+        self.theoricCanvas = Th
+        toolbarTh = NavigationToolbar(Th, self)
         
         groupBoxCalculations = QGroupBox('Calculations')
         calbox = QVBoxLayout()
         calbox.addLayout(GridResult)
         calbox.addStretch(1)
+        calbox.addWidget(toolbarTh)
+        calbox.addWidget(Th)
         groupBoxCalculations.setLayout(calbox)
         
         groupBoxResult = QGroupBox('Settings')

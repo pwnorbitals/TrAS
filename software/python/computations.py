@@ -30,7 +30,8 @@ def Find_tftt(T, kp, Y):
         T_f = 0
     else:
         T_f = Down_2 - Down_1
-    return T_t, T_f
+    T_mid = (Up_2 + Up_1 + Down_1 + Down_2)/4
+    return T_t, T_f, T_mid
 
 
 def Param(R_star, Period, time, k_ps, Y):
@@ -39,7 +40,7 @@ def Param(R_star, Period, time, k_ps, Y):
     timestamp in seconds, kept_peaks, magnitude
     """
     # Light curve data
-    T_t, T_f = Find_tftt(time, k_ps, Y)
+    T_t, T_f, tE = Find_tftt(time, k_ps, Y)
     Depth = abs(max(Y) - min(Y))
     print("\t",T_t)
     print("\t",T_f)
@@ -47,7 +48,7 @@ def Param(R_star, Period, time, k_ps, Y):
     sinT_t = np.float_power( np.sin(T_t * np.pi/Period), 2) 
     sinT_f = np.float_power( np.sin(T_f * np.pi/Period), 2)
 
-    return Depth, sinT_t, sinT_f, T_t, T_f
+    return Depth, sinT_t, sinT_f, T_t, T_f, tE
 
 def Impact_parameter(sinT_t, sinT_f, Depth):
     """
