@@ -69,4 +69,7 @@ class SettingsDialog(QDialog):
 
     def restoreSettings(self):
         settings = QSettings("IPSA", "ciri")
-        self.index = list(map(int, settings.value('index')))
+        try :
+            self.index = list(map(int, settings.value('index')))
+        except:
+            self.index = [0]*4
