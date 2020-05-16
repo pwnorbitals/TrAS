@@ -1,5 +1,1 @@
-__pyccache__/
-.vscode/
-software/build/
-software/dist/
-software/__pycache__/
+.vscode
