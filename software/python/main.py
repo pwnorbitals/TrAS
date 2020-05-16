@@ -12,6 +12,6 @@ qApp = QtWidgets.QApplication(sys.argv)
 
 aw = appWindow.ApplicationWindow()
 aw.setWindowTitle("%s" % progname)
-aw.setWindowIcon(QIcon(scriptDir + os.path.sep + '..' + os.path.sep + 'img' + os.path.sep + 'LOGO5.png'))
+aw.setWindowIcon(QIcon(scriptDir + os.path.sep + '..' + os.path.sep + 'img' + os.path.sep + 'LOGO6.png'))
 aw.show()
 sys.exit(qApp.exec_())

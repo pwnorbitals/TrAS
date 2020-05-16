@@ -29,7 +29,7 @@ def GroupDataBase(self):
         self.buttonImport.clicked.connect(lambda : importSelection(self))
 
         pic = QLabel(self)
-        pic.setPixmap(QPixmap(scriptDir + os.path.sep + '..' + os.path.sep + 'img' + os.path.sep + 'LOGO5.png').scaled(200, 200))
+        pic.setPixmap(QPixmap(scriptDir + os.path.sep + '..' + os.path.sep + 'img' + os.path.sep + 'LOGO6.png').scaled(200, 200))
         pic.setAlignment(QtCore.Qt.AlignCenter)
 
 
