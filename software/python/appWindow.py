@@ -96,6 +96,8 @@ class ApplicationWindow(QtWidgets.QMainWindow):
             try:
                 self.lines = [line[:-1].split(' ') for line in lines]
                 parseData.parseData(self)
+                self.ListRefStar = computations.Header(self.lines[0])
+                self.ChoiceOfStar()
             except Exception as e:
                 msg = QMessageBox()
                 msg.setIcon(QMessageBox.Critical)

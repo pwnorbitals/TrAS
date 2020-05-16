@@ -8,6 +8,7 @@ import LightCurvePlot as LCP
 # Numpy, scipy, datetime
 from scipy.signal import find_peaks
 from scipy.stats import linregress
+from scipy.optimize import curve_fit
 from scipy.ndimage import gaussian_filter1d
 
     # Extract part of an array around a position with a given size : arr[pos-halfsize, pos+halfsize]
@@ -30,6 +31,9 @@ def windowAround(arr, pos, halfsize):
 def smooth(inlist, param):
     return gaussian_filter1d(inlist, param)
 
+def Linear(x, a, b):
+    return a*x+b
+
 def parseData(self):
         if not hasattr(self, "lines"):
             return
@@ -37,8 +41,8 @@ def parseData(self):
         lines = self.lines
         header = lines[0]
 
-        self.ListRefStar = comp.Header(header)
-        self.ChoiceOfStar()
+        
+        
         
         meta = lines[1]
         data = np.array([x for x in lines[2:] if x[header.index(self.Y)] != "99.99999"]).T
@@ -118,6 +122,8 @@ def parseData(self):
         # Add list mag to get the begin of each approximation
         boundaries = []
         mag = []
+        b = VC[0]
+        tol = 1e-6
         for i in range(len(kept_peaks)):
 
             # subdivide interval
@@ -128,22 +134,28 @@ def parseData(self):
             else:
                 max_of_range = kept_peaks[i+1]
             #print(min_of_range, max_of_range)
-
-            # get x and y data for linear regression on the interval
-            x = timestamps[min_of_range:max_of_range]
+            
+            # get x and y data for linear regression on the interval | reduce time series to have x[0] = 0
+            x = [i-timestamps[min_of_range] for i in timestamps[min_of_range:max_of_range]]
             y = VC[min_of_range:max_of_range]
-
+            
             # run linear regression
-            fits.append(linregress(x,y)) # slope, intercept, r_value, p_value, std_err
-
+            #fits.append(linregress(x,y)) # slope, intercept, r_value, p_value, std_err
+            fits, cov = curve_fit(Linear, x, y, bounds=([-np.inf, b-tol],[np.inf,b]))
+            
             # get x and y value after regression
-            xvals = timestamps[min_of_range:max_of_range]
-            yvals = [fits[-1].slope * timestamps[j] + fits[-1].intercept for j in range(min_of_range, max_of_range)]
+            xvals = np.array(timestamps[min_of_range:max_of_range])
+            b_star = b-fits[0]*xvals[0]
+            #yvals = [fits[-1].slope * timestamps[j] + b for j in range(min_of_range, max_of_range)]
+            yvals = Linear(xvals, fits[0], b_star)
             #self.dataCanvas.axes.plot(y, xvals)
             self.dataCanvas.axes.plot(xvals, yvals)
             #print(fits)
             mag.extend([yvals[0], yvals[-1]])
             boundaries.extend([min_of_range, max_of_range-1])
+            b = yvals[-1]
+            
+            
 
         self.errorCanvas.fig.canvas.draw()
         self.errorCanvas.fig.canvas.flush_events()
