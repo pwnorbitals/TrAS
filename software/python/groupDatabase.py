@@ -1,7 +1,11 @@
 from PyQt5.QtWidgets import QLabel, QComboBox, QLineEdit, QGroupBox, QVBoxLayout, QPushButton
+from PyQt5.QtGui import QPixmap
+from PyQt5 import QtCore
 import threading
 import pyvo
+import os
 
+scriptDir = os.path.dirname(os.path.realpath(__file__))
 exoplanet = pyvo.dal.TAPService("http://voparis-tap-planeto.obspm.fr/tap")
 
 def GroupDataBase(self):
@@ -24,6 +28,10 @@ def GroupDataBase(self):
         self.buttonImport.setToolTip('Import')
         self.buttonImport.clicked.connect(lambda : importSelection(self))
 
+        pic = QLabel(self)
+        pic.setPixmap(QPixmap(scriptDir + os.path.sep + '..' + os.path.sep + 'img' + os.path.sep + 'LOGO6.png').scaled(200, 200))
+        pic.setAlignment(QtCore.Qt.AlignCenter)
+
 
         groupBoxDataBase = QGroupBox('Import Data')
         hbox = QVBoxLayout()
@@ -33,8 +41,8 @@ def GroupDataBase(self):
         hbox.addWidget(self.labelMenuD)
         hbox.addWidget(self.MenuD)
         hbox.addWidget(self.buttonImport)
-
-        hbox.addStretch(1)
+        hbox.addStretch()
+        hbox.addWidget(pic)
         groupBoxDataBase.setLayout(hbox)
 
 
