@@ -17,6 +17,7 @@ This program was carried out by 3 IPSA students:
 1. Boitier WIlliam
 1. Calka Magdalena 
 1. de Claverie Chris
+
 as part of the research and innovation initiation course (CIRI research and innovation initiation course).
 
 # How to use it
