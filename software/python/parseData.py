@@ -166,8 +166,8 @@ def parseData(self):
         self.dataCanvas.fig.canvas.flush_events()
 
 
-        R_s = self.Star_Radius
-        Period = self.Period
+        R_s = self.SRadius._value
+        Period = self.PPeriod._value
 
         Depth, sintt, sintf, Tot, full, midtime = comp.Param(R_s, Period, timestamps, boundaries, mag)
         imp_b = comp.Impact_parameter(sintt, sintf, Depth)

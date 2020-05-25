@@ -73,9 +73,6 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         grid.addWidget(groupDatabase.GroupDataBase(self),0,2)
         grid.setSpacing(10)
 
-        self.Star_Radius = 1.0
-        self.Period = 1.0
-
         self.Y="V-C"
         
     def About(self):
@@ -128,7 +125,7 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         self.close()
 
     def RadiusChanged(self):
-        self.Star_Radius = float(self.RS_input.text())
+        self.SRadius._value = float(self.RS_input.text())
         self.compute_figures()
 
     def PeriodChanged(self):

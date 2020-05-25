@@ -66,7 +66,7 @@ class ResultField():
                 self._valWidget.setText(str(converted))
 
         def __init__(self, dimension:Dimension, label, widgetType:QWidget=QLabel):
-                self._value = 0
+                self._value = 1
                 self._label = QLabel(label)
                 self._valWidget = widgetType()
                 self._dim = dimension
