@@ -21,10 +21,43 @@ def GroupResult(self):
         self.labelPeriod = QLabel()
         self.labelPeriod.setText("Enter the Period of orbit (%s):"%self.str_conv[2])
 
-        self.PlanetLabel = QLabel('Planet radius : \nPlanet mass : ')
+
+
         self.StarLabel = QLabel('Star density : \nStar mass : ')
         self.Other = QLabel('Impact parameter b : \nSemimajor axis a : \nInclinaison : ')
         self.LC = QLabel('Depth : \nTotal duration : \nFull duration : ')
+
+
+
+
+
+        self.PlanetLayout = QGridLayout()
+        self.PRadiusLabel = QLabel('Planet radius : ')
+        self.PMassLabel = QLabel('Planet mass : ')
+        self.PRadiusValue = QLabel('?')
+        self.PMassValue = QLabel('?')
+        self.PRadiusCombo = QComboBox()
+        self.PRadiusCombo.addItems(['m', 'km', 'Rj', 'Rs', 'UA', 'LY'])
+        self.PMassCombo = QComboBox()
+        self.PMassCombo.addItems(['kg', 'T', 'Mj', 'Ms'])
+        self.PlanetLayout.addWidget(self.PRadiusLabel, 0, 1)
+        self.PlanetLayout.addWidget(self.PRadiusValue, 0, 2)
+        self.PlanetLayout.addWidget(self.PRadiusCombo, 0, 3)
+        self.PlanetLayout.addWidget(self.PMassLabel, 1, 1)
+        self.PlanetLayout.addWidget(self.PMassValue, 1, 2)
+        self.PlanetLayout.addWidget(self.PMassCombo, 1, 3)
+
+
+        self.StarLayout = QGridLayout()
+
+        self.OtherLayout = QGridLayout()
+
+        self.LCLayout = QGridLayout()
+
+
+
+
+
 
         self.labelInfosK = QLabel('Change the K coefficient :  (note: coeff was calculated to be optimal)')
 
@@ -109,7 +142,7 @@ def GroupResult(self):
         GridResult.addWidget(self.Per_input, 1,1)
         
         #Deduced Parameter
-        GridResult.addWidget(self.PlanetLabel, 2,0)
+        GridResult.addLayout(self.PlanetLayout, 2,0)
         GridResult.addWidget(self.StarLabel, 3,0)
         GridResult.addWidget(self.LC, 2,1)
         GridResult.addWidget(self.Other, 3,1)

@@ -10,6 +10,7 @@ from scipy.signal import find_peaks
 from scipy.stats import linregress
 from scipy.optimize import curve_fit
 from scipy.ndimage import gaussian_filter1d
+from scipy.interpolate import interp1d
 
     # Extract part of an array around a position with a given size : arr[pos-halfsize, pos+halfsize]
 def windowAround(arr, pos, halfsize):
@@ -41,9 +42,6 @@ def parseData(self):
         lines = self.lines
         header = lines[0]
 
-        
-        
-        
         meta = lines[1]
         data = np.array([x for x in lines[2:] if x[header.index(self.Y)] != "99.99999"]).T
 
@@ -58,9 +56,13 @@ def parseData(self):
         a = self.sa.value()
         b = self.sb.value()
         JDHEL = JDHEL[a : -(b+1)]
-        VC = VC[a : -(b+1)]
+        VC = [float(d) for d in VC[a : -(b+1)]]
         timestamps = timestamps[a : -(b+1)]
         dates = dates[a : -(b+1)]       
+
+        #timestamps_interp = list(np.arange(timestamps[0], timestamps[-1], 0.1))
+        #VC_interp_fct = interp1d(timestamps, VC)
+        #VC_interp = [VC_interp_fct(x) for x in timestamps_interp]
 
 
         # Compute resolution 
@@ -80,7 +82,8 @@ def parseData(self):
         #print(VC)
         self.dataCanvas.axes.clear()
         self.dataCanvas.axes.set_title("Data")
-        self.dataCanvas.axes.plot(timestamps, [float(d) for d in VC], linewidth=1.0)
+        self.dataCanvas.axes.plot(timestamps, VC, linewidth=1.0)
+        #self.dataCanvas.axes.plot(timestamps_interp, VC_interp, linewidth=1.0)
 
         # Compute standard errors (use tunable parameter)
         errors = []
@@ -185,7 +188,7 @@ def parseData(self):
         M_planet = comp.Planet_mass(M_star, Period, Semi_a)
 
         # Update Label
-        planet = "Planet radius : {0:.5E} {1} \nPlanet mass : {2:.3E} {3}".format((R_p*l), self.str_conv[0], (M_planet*m), self.str_conv[1])
+        #planet = "Planet radius : {0:.5E} {1} \nPlanet mass : {2:.3E} {3}".format((R_p*l), self.str_conv[0], (M_planet*m), self.str_conv[1])
         star = "Star density : {0:.5E} kg/m3 \nStar mass : {1:.3E} {2}".format(Star_d, (M_star*m), self.str_conv[1])
         other = "Impact parameter b : {0:.5E} \nSemi-major a : {1:.5E} {2} \nInclinaison : {3:.3f} {4}".format(imp_b, (Semi_a*l), self.str_conv[0], (alpha*a), self.str_conv[3])
         lightcurve = "Depth : {0:.3f} \nTotal duration : {1:.3E} {2} \nFull Duration : {3:.3E} {4}".format(Depth, (Tot*t), self.str_conv[2], (full*t), self.str_conv[2])
@@ -193,7 +196,9 @@ def parseData(self):
         self.labelRadius.setText("Enter the Star's radius (%s):"% self.str_conv[0])
         self.labelPeriod.setText("Enter the Period of orbit (%s):"% self.str_conv[2])
 
-        self.PlanetLabel.setText(planet)
+        self.PRadiusValue.setText(str(R_p*l))
+        self.PMassValue.setText(str(M_planet*m))
+
         self.StarLabel.setText(star)
         self.Other.setText(other)
         self.LC.setText(lightcurve)
@@ -208,7 +213,7 @@ def parseData(self):
         self.theoricCanvas.axes.clear()
         self.theoricCanvas.axes.set_title('Analytical Light Curve')
         self.theoricCanvas.axes.plot(timestamps, flux, linewidth=1.0)
-        self.theoricCanvas.axes.plot(timestamps, [float(d)+Norm for d in VC], linewidth=1.0)
+        self.theoricCanvas.axes.plot(timestamps, [d+Norm for d in VC], linewidth=1.0)
 
         self.theoricCanvas.fig.canvas.draw()
         self.theoricCanvas.fig.canvas.flush_events()
