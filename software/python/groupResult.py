@@ -9,7 +9,7 @@ from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as Navigatio
 import canvas
 
 MassUnits = {
-        'Kg': 1,
+        'kg': 1,
         'T': 1/1000,
         'Mj': 1/(1.89813e27),
         'Ms': 1/(1.9884e30) 
@@ -17,7 +17,7 @@ MassUnits = {
 
 AngleUnits = {
         'Deg': 180/3.14159265,
-        'rad': 1
+        'Rad': 1
 }
 
 LengthUnits = {
@@ -40,7 +40,7 @@ DensityUnits = {
         'kg/m3': 1
 }
 
-NoneUnits = { 'None': 1}
+NoneUnits = { 'None': 1 }
 
 class Dimension(Enum):
         LENGTH = auto(),
@@ -82,17 +82,6 @@ class ResultField():
         def value(self, newvalue):
                 self._value = newvalue
                 self.convert()
-
-
-        @property
-        def dim(self):
-                return self._dim
-
-        @value.setter
-        def dim(self, newdim:Dimension):
-                self._dim = newdim
-                self._combo.clear()
-                self._combo.addItems(list(DimensionMap[self._dim].keys()))
 
                 
 def Slider(self, min, step, default):
@@ -141,7 +130,7 @@ def GroupResult(self):
 
         self.ImpParameter = ResultField(Dimension.NONE, 'Impact parameter :')
         self.SMA = ResultField(Dimension.LENGTH, 'Semi-major axis : ')
-        self.inc = ResultField(Dimension.NONE, 'Inclination : ')
+        self.inc = ResultField(Dimension.ANGLE, 'Inclination : ')
         self.OtherLayout = QGridLayout()
         self.OtherLayout.addWidget(self.ImpParameter._label, 0, 1)
         self.OtherLayout.addWidget(self.ImpParameter._valWidget, 0, 2)
