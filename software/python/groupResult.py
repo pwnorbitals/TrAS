@@ -195,10 +195,7 @@ def GroupResult(self):
 
         
         self.ss = Slider(self, 1, 1, 2)
-
-        
         self.sk = Slider(self, 2, 1, 8)
-        
 
         sliderP = QSlider(Qt.Horizontal)
         sliderP.setFocusPolicy(Qt.StrongFocus)
