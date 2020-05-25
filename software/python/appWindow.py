@@ -50,8 +50,6 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         self.file_menu = QtWidgets.QMenu('&File', self)
         self.file_menu.addAction('&Open', self.openFile,
                                  Qt.CTRL + Qt.Key_O)
-        self.file_menu.addAction('&Settings', self.openSettings,
-                                 Qt.CTRL + Qt.Key_U)
         self.file_menu.addAction('&Quit', self.fileQuit,
                                  Qt.CTRL +Qt.Key_Q)
         self.menuBar().addMenu(self.file_menu)
@@ -106,15 +104,6 @@ class ApplicationWindow(QtWidgets.QMainWindow):
                 msg.setWindowTitle("Open exception")
                 msg.setStandardButtons(QMessageBox.Ok)
                 msg.exec_()
-
-    def openSettings(self):
-        dlg = settingsDialog.SettingsDialog(self)
-        dlg.exec_()
-        if dlg.result() == 0:
-            str_c = dlg.accept()
-            self.conversion = computations.Conversion(str_c)
-            self.str_conv = computations.Update_str(str_c)
-            self.compute_figures()
 
     def GroupGraph(self):
          #graphics and toolbars        
