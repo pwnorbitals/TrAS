@@ -178,9 +178,6 @@ def parseData(self):
         M_star = comp.Star_mass(R_s, Star_d)
         M_planet = comp.Planet_mass(M_star, Period, Semi_a)
         
-        self.labelRadius.setText("Enter the Star's radius (%s):"% self.str_conv[0])
-        self.labelPeriod.setText("Enter the Period of orbit (%s):"% self.str_conv[2])
-
         self.PRadius.value = R_p
         self.PMass.value = M_planet
         self.SDensity = Star_d

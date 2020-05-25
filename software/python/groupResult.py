@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QComboBox, QLabel, QSlider, QLineEdit, QHBoxLayout, QGridLayout, QGroupBox, QVBoxLayout
+from PyQt5.QtWidgets import QWidget, QComboBox, QLabel, QSlider, QLineEdit, QHBoxLayout, QGridLayout, QGroupBox, QVBoxLayout
 from PyQt5.QtGui import QDoubleValidator
 from PyQt5.QtCore import Qt
 from PyQt5 import QtWidgets
@@ -63,16 +63,16 @@ class ResultField():
         def convert(self):
                 factor = DimensionMap[self._dim][self._combo.currentText()]
                 converted = self._value*factor
-                self._valLabel.setText(str(converted))
+                self._valWidget.setText(str(converted))
 
-        def __init__(self, dimension:Dimension, label):
+        def __init__(self, dimension:Dimension, label, widgetType:QWidget=QLabel):
                 self._value = 0
                 self._label = QLabel(label)
-                self._valLabel = QLabel()
+                self._valWidget = widgetType()
                 self._dim = dimension
                 self._combo = QComboBox()
                 self._combo.addItems(list(DimensionMap[self._dim].keys()))
-                self._combo.activated.connect(self.convert)
+                self._combo.currentIndexChanged.connect(self.convert)
 
         @property
         def value(self):
@@ -94,6 +94,18 @@ class ResultField():
                 self._combo.clear()
                 self._combo.addItems(list(DimensionMap[self._dim].keys()))
 
+                
+def Slider(self, min, step, default):
+        slider = QSlider(Qt.Horizontal)
+        slider.setFocusPolicy(Qt.StrongFocus)
+        slider.setTickPosition(QSlider.TicksBothSides)
+        slider.setTickInterval(10)
+        slider.setSingleStep(step)
+        slider.setMinimum(min)
+        slider.setValue(default)
+        slider.valueChanged.connect(self.compute_figures)
+        return slider
+
 def GroupResult(self):
         # Menu deroulant
         self.MenuS = QComboBox(self)
@@ -102,30 +114,28 @@ def GroupResult(self):
         labelMenuS = QLabel()
         labelMenuS.setText("Reference Star")
 
-        self.labelRadius = QLabel()
-        self.labelRadius.setText("Enter the Star's radius (%s):"% self.str_conv[0])
-
-        self.labelPeriod = QLabel()
-        self.labelPeriod.setText("Enter the Period of orbit (%s):"%self.str_conv[2])
+        self.PPeriod = ResultField(Dimension.TIME, 'Period of orbit :', QLineEdit)
+        self.SRadius = ResultField(Dimension.LENGTH, 'Star\'s radius :', QLineEdit)
+        
 
         self.PRadius = ResultField(Dimension.LENGTH, 'Planet radius :')
         self.PMass = ResultField(Dimension.MASS, 'Planet mass :')
         self.PlanetLayout = QGridLayout()
         self.PlanetLayout.addWidget(self.PRadius._label, 0, 1)
-        self.PlanetLayout.addWidget(self.PRadius._valLabel, 0, 2)
+        self.PlanetLayout.addWidget(self.PRadius._valWidget, 0, 2)
         self.PlanetLayout.addWidget(self.PRadius._combo, 0, 3)
         self.PlanetLayout.addWidget(self.PMass._label, 1, 1)
-        self.PlanetLayout.addWidget(self.PMass._valLabel, 1, 2)
+        self.PlanetLayout.addWidget(self.PMass._valWidget, 1, 2)
         self.PlanetLayout.addWidget(self.PMass._combo, 1, 3)
 
         self.SDensity = ResultField(Dimension.DENSITY, 'Star density : ')
         self.SMass = ResultField(Dimension.MASS, 'Star mass : ')
         self.StarLayout = QGridLayout()
         self.StarLayout.addWidget(self.SDensity._label, 0, 1)
-        self.StarLayout.addWidget(self.SDensity._valLabel, 0, 2)
+        self.StarLayout.addWidget(self.SDensity._valWidget, 0, 2)
         self.StarLayout.addWidget(self.SDensity._combo, 0, 3)
         self.StarLayout.addWidget(self.SMass._label, 1, 1)
-        self.StarLayout.addWidget(self.SMass._valLabel, 1, 2)
+        self.StarLayout.addWidget(self.SMass._valWidget, 1, 2)
         self.StarLayout.addWidget(self.SMass._combo, 1, 3)
 
 
@@ -134,13 +144,13 @@ def GroupResult(self):
         self.inc = ResultField(Dimension.NONE, 'Inclination : ')
         self.OtherLayout = QGridLayout()
         self.OtherLayout.addWidget(self.ImpParameter._label, 0, 1)
-        self.OtherLayout.addWidget(self.ImpParameter._valLabel, 0, 2)
+        self.OtherLayout.addWidget(self.ImpParameter._valWidget, 0, 2)
         self.OtherLayout.addWidget(self.ImpParameter._combo, 0, 3)
         self.OtherLayout.addWidget(self.inc._label, 1, 1)
-        self.OtherLayout.addWidget(self.inc._valLabel, 1, 2)
+        self.OtherLayout.addWidget(self.inc._valWidget, 1, 2)
         self.OtherLayout.addWidget(self.inc._combo, 1, 3)
         self.OtherLayout.addWidget(self.SMA._label, 2, 1)
-        self.OtherLayout.addWidget(self.SMA._valLabel, 2, 2)
+        self.OtherLayout.addWidget(self.SMA._valWidget, 2, 2)
         self.OtherLayout.addWidget(self.SMA._combo, 2, 3)
 
 
@@ -149,13 +159,13 @@ def GroupResult(self):
         self.FullDuration = ResultField(Dimension.TIME, 'Full duration :')
         self.LCLayout = QGridLayout()
         self.LCLayout.addWidget(self.depth._label, 0, 1)
-        self.LCLayout.addWidget(self.depth._valLabel, 0, 2)
+        self.LCLayout.addWidget(self.depth._valWidget, 0, 2)
         self.LCLayout.addWidget(self.depth._combo, 0, 3)
         self.LCLayout.addWidget(self.TotalDuration._label, 1, 1)
-        self.LCLayout.addWidget(self.TotalDuration._valLabel, 1, 2)
+        self.LCLayout.addWidget(self.TotalDuration._valWidget, 1, 2)
         self.LCLayout.addWidget(self.TotalDuration._combo, 1, 3)
         self.LCLayout.addWidget(self.FullDuration._label, 2, 1)
-        self.LCLayout.addWidget(self.FullDuration._valLabel, 2, 2)
+        self.LCLayout.addWidget(self.FullDuration._valWidget, 2, 2)
         self.LCLayout.addWidget(self.FullDuration._combo, 2, 3)
 
 
@@ -175,34 +185,20 @@ def GroupResult(self):
         self.labelInfoP = QLabel()
         self.labelInfoP.setText('The prominence value changes the sensitivity of peak detection on the errors graph : ')
 
+
         self.validator = QDoubleValidator()
-        self.RS_input = QLineEdit()
-        self.RS_input.setValidator(self.validator)
-        self.RS_input.returnPressed.connect(self.RadiusChanged)
+        self.SRadius._valWidget.setValidator(self.validator)
+        self.SRadius._valWidget.returnPressed.connect(self.RadiusChanged)
         
-        self.Per_input = QLineEdit()
-        self.Per_input.setValidator(self.validator)
-        self.Per_input.returnPressed.connect(self.PeriodChanged)
+        self.PPeriod._valWidget.setValidator(self.validator)
+        self.PPeriod._valWidget.returnPressed.connect(self.PeriodChanged)
 
-        sliderS = QSlider(Qt.Horizontal)
-        sliderS.setFocusPolicy(Qt.StrongFocus)
-        sliderS.setTickPosition(QSlider.TicksBothSides)
-        sliderS.setTickInterval(10)
-        sliderS.setSingleStep(1)
-        sliderS.setMinimum(1)
-        sliderS.valueChanged.connect(self.compute_figures)
-        self.ss = sliderS
-        sliderS.setValue(2)
+        
+        self.ss = Slider(self, 1, 1, 2)
 
-        sliderK = QSlider(Qt.Horizontal)
-        sliderK.setFocusPolicy(Qt.StrongFocus)
-        sliderK.setTickPosition(QSlider.TicksBothSides)
-        sliderK.setTickInterval(10)
-        sliderK.setSingleStep(1)
-        sliderK.setMinimum(2)
-        sliderK.valueChanged.connect(self.compute_figures)
-        self.sk = sliderK
-        sliderK.setValue(8)
+        
+        self.sk = Slider(self, 2, 1, 8)
+        
 
         sliderP = QSlider(Qt.Horizontal)
         sliderP.setFocusPolicy(Qt.StrongFocus)
@@ -237,11 +233,18 @@ def GroupResult(self):
         hbox.addWidget(sliderB)
 
         GridResult = QGridLayout()
+
+        LineLayout = QGridLayout()
         #User Input
-        GridResult.addWidget(self.labelRadius, 0,0)
-        GridResult.addWidget(self.RS_input, 1,0)
-        GridResult.addWidget(self.labelPeriod, 0,1)
-        GridResult.addWidget(self.Per_input, 1,1)
+        LineLayout.addWidget(self.SRadius._label, 0,0)
+        LineLayout.addWidget(self.SRadius._valWidget, 1,0)
+        LineLayout.addWidget(self.SRadius._combo, 1,1)
+
+        LineLayout.addWidget(self.PPeriod._label, 0,2)
+        LineLayout.addWidget(self.PPeriod._valWidget, 1,2)
+        LineLayout.addWidget(self.PPeriod._combo, 1,3)
+
+        GridResult.addLayout(LineLayout, 0, 0, 1, 2)
         
         #Deduced Parameter
         GridResult.addLayout(self.PlanetLayout, 2,0)
@@ -267,9 +270,9 @@ def GroupResult(self):
         vbox.addWidget(labelMenuS)
         vbox.addWidget(self.MenuS)
         vbox.addWidget(self.labelInfosK)
-        vbox.addWidget(sliderK)
+        vbox.addWidget(self.sk)
         vbox.addWidget(self.labelInfosS)
-        vbox.addWidget(sliderS)
+        vbox.addWidget(self.ss)
         vbox.addWidget(self.labelInfoP)
         vbox.addWidget(sliderP)
         vbox.addWidget(labelInfosA)
@@ -283,3 +286,4 @@ def GroupResult(self):
         ret.addWidget(groupBoxCalculations)
         
         return ret
+        
