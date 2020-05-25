@@ -15,7 +15,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 # Purpose
 This program was carried out by 3 IPSA students:
-1. Boitier WIlliam
+1. Boitier William
 1. Calka Magdalena 
 1. de Claverie Chris
 
