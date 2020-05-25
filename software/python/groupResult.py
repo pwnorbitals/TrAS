@@ -2,10 +2,97 @@ from PyQt5.QtWidgets import QComboBox, QLabel, QSlider, QLineEdit, QHBoxLayout, 
 from PyQt5.QtGui import QDoubleValidator
 from PyQt5.QtCore import Qt
 from PyQt5 import QtWidgets
+from enum import Enum, auto
 
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 
 import canvas
+
+MassUnits = {
+        'Kg': 1,
+        'T': 1/1000,
+        'Mj': 1/(1.89813e27),
+        'Ms': 1/(1.9884e30) 
+}
+
+AngleUnits = {
+        'Deg': 180/3.14159265,
+        'rad': 1
+}
+
+LengthUnits = {
+        'm': 1000,
+        'Km': 1,
+        'Rs': 1/695700,
+        'Rj': 1/71492,
+        'UA': 1/(1.5e8)
+}
+
+TimeUnits = {
+        's': 1,
+        'min': 1/60,
+        'h': 1/(60*60),
+        'day': 1/(60*60*24),
+        'year': 1/(60*60*24*365)
+}
+
+DensityUnits = {
+        'kg/m3': 1
+}
+
+NoneUnits = { 'None': 1}
+
+class Dimension(Enum):
+        LENGTH = auto(),
+        MASS = auto(),
+        TIME = auto(),
+        DENSITY = auto(),
+        ANGLE = auto(),
+        NONE = auto()
+
+DimensionMap = {
+        Dimension.LENGTH: LengthUnits,
+        Dimension.MASS: MassUnits,
+        Dimension.TIME: TimeUnits,
+        Dimension.NONE: NoneUnits,
+        Dimension.DENSITY: DensityUnits,
+        Dimension.ANGLE : AngleUnits
+}
+
+class ResultField():
+        def convert(self):
+                factor = DimensionMap[self._dim][self._combo.currentText()]
+                converted = self._value*factor
+                self._valLabel.setText(str(converted))
+
+        def __init__(self, dimension:Dimension, label):
+                self._value = 0
+                self._label = QLabel(label)
+                self._valLabel = QLabel()
+                self._dim = dimension
+                self._combo = QComboBox()
+                self._combo.addItems(list(DimensionMap[self._dim].keys()))
+                self._combo.activated.connect(self.convert)
+
+        @property
+        def value(self):
+                return self._value
+        
+        @value.setter
+        def value(self, newvalue):
+                self._value = newvalue
+                self.convert()
+
+
+        @property
+        def dim(self):
+                return self._dim
+
+        @value.setter
+        def dim(self, newdim:Dimension):
+                self._dim = newdim
+                self._combo.clear()
+                self._combo.addItems(list(DimensionMap[self._dim].keys()))
 
 def GroupResult(self):
         # Menu deroulant
@@ -21,40 +108,55 @@ def GroupResult(self):
         self.labelPeriod = QLabel()
         self.labelPeriod.setText("Enter the Period of orbit (%s):"%self.str_conv[2])
 
-
-
-        self.StarLabel = QLabel('Star density : \nStar mass : ')
-        self.Other = QLabel('Impact parameter b : \nSemimajor axis a : \nInclinaison : ')
-        self.LC = QLabel('Depth : \nTotal duration : \nFull duration : ')
-
-
-
-
-
+        self.PRadius = ResultField(Dimension.LENGTH, 'Planet radius :')
+        self.PMass = ResultField(Dimension.MASS, 'Planet mass :')
         self.PlanetLayout = QGridLayout()
-        self.PRadiusLabel = QLabel('Planet radius : ')
-        self.PMassLabel = QLabel('Planet mass : ')
-        self.PRadiusValue = QLabel('?')
-        self.PMassValue = QLabel('?')
-        self.PRadiusCombo = QComboBox()
-        self.PRadiusCombo.addItems(['m', 'km', 'Rj', 'Rs', 'UA', 'LY'])
-        self.PMassCombo = QComboBox()
-        self.PMassCombo.addItems(['kg', 'T', 'Mj', 'Ms'])
-        self.PlanetLayout.addWidget(self.PRadiusLabel, 0, 1)
-        self.PlanetLayout.addWidget(self.PRadiusValue, 0, 2)
-        self.PlanetLayout.addWidget(self.PRadiusCombo, 0, 3)
-        self.PlanetLayout.addWidget(self.PMassLabel, 1, 1)
-        self.PlanetLayout.addWidget(self.PMassValue, 1, 2)
-        self.PlanetLayout.addWidget(self.PMassCombo, 1, 3)
+        self.PlanetLayout.addWidget(self.PRadius._label, 0, 1)
+        self.PlanetLayout.addWidget(self.PRadius._valLabel, 0, 2)
+        self.PlanetLayout.addWidget(self.PRadius._combo, 0, 3)
+        self.PlanetLayout.addWidget(self.PMass._label, 1, 1)
+        self.PlanetLayout.addWidget(self.PMass._valLabel, 1, 2)
+        self.PlanetLayout.addWidget(self.PMass._combo, 1, 3)
 
-
+        self.SDensity = ResultField(Dimension.DENSITY, 'Star density : ')
+        self.SMass = ResultField(Dimension.MASS, 'Star mass : ')
         self.StarLayout = QGridLayout()
+        self.StarLayout.addWidget(self.SDensity._label, 0, 1)
+        self.StarLayout.addWidget(self.SDensity._valLabel, 0, 2)
+        self.StarLayout.addWidget(self.SDensity._combo, 0, 3)
+        self.StarLayout.addWidget(self.SMass._label, 1, 1)
+        self.StarLayout.addWidget(self.SMass._valLabel, 1, 2)
+        self.StarLayout.addWidget(self.SMass._combo, 1, 3)
 
+
+        self.ImpParameter = ResultField(Dimension.NONE, 'Impact parameter :')
+        self.SMA = ResultField(Dimension.LENGTH, 'Semi-major axis : ')
+        self.inc = ResultField(Dimension.NONE, 'Inclination : ')
         self.OtherLayout = QGridLayout()
+        self.OtherLayout.addWidget(self.ImpParameter._label, 0, 1)
+        self.OtherLayout.addWidget(self.ImpParameter._valLabel, 0, 2)
+        self.OtherLayout.addWidget(self.ImpParameter._combo, 0, 3)
+        self.OtherLayout.addWidget(self.inc._label, 1, 1)
+        self.OtherLayout.addWidget(self.inc._valLabel, 1, 2)
+        self.OtherLayout.addWidget(self.inc._combo, 1, 3)
+        self.OtherLayout.addWidget(self.SMA._label, 2, 1)
+        self.OtherLayout.addWidget(self.SMA._valLabel, 2, 2)
+        self.OtherLayout.addWidget(self.SMA._combo, 2, 3)
 
+
+        self.depth = ResultField(Dimension.NONE, 'Depth :')
+        self.TotalDuration = ResultField(Dimension.TIME, 'Total duration :')
+        self.FullDuration = ResultField(Dimension.TIME, 'Full duration :')
         self.LCLayout = QGridLayout()
-
-
+        self.LCLayout.addWidget(self.depth._label, 0, 1)
+        self.LCLayout.addWidget(self.depth._valLabel, 0, 2)
+        self.LCLayout.addWidget(self.depth._combo, 0, 3)
+        self.LCLayout.addWidget(self.TotalDuration._label, 1, 1)
+        self.LCLayout.addWidget(self.TotalDuration._valLabel, 1, 2)
+        self.LCLayout.addWidget(self.TotalDuration._combo, 1, 3)
+        self.LCLayout.addWidget(self.FullDuration._label, 2, 1)
+        self.LCLayout.addWidget(self.FullDuration._valLabel, 2, 2)
+        self.LCLayout.addWidget(self.FullDuration._combo, 2, 3)
 
 
 
@@ -143,9 +245,9 @@ def GroupResult(self):
         
         #Deduced Parameter
         GridResult.addLayout(self.PlanetLayout, 2,0)
-        GridResult.addWidget(self.StarLabel, 3,0)
-        GridResult.addWidget(self.LC, 2,1)
-        GridResult.addWidget(self.Other, 3,1)
+        GridResult.addLayout(self.StarLayout, 3,0)
+        GridResult.addLayout(self.LCLayout, 2,1)
+        GridResult.addLayout(self.OtherLayout, 3,1)
 
         #Analytical light curve
         Th = canvas.Canvas(self.main_widget, width=5, height=5, dpi=100)

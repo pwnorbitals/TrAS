@@ -166,17 +166,8 @@ def parseData(self):
         self.dataCanvas.fig.canvas.flush_events()
 
 
-            # Deduce parameters
-        
-        #Conversion parameters for output
-        l = self.conversion[0]
-        m = self.conversion[1]
-        t = self.conversion[2]
-        a = self.conversion[3]
-
-        # Convert input to km and second
-        R_s = self.Star_Radius / l
-        Period = self.Period / t
+        R_s = self.Star_Radius
+        Period = self.Period
 
         Depth, sintt, sintf, Tot, full, midtime = comp.Param(R_s, Period, timestamps, boundaries, mag)
         imp_b = comp.Impact_parameter(sintt, sintf, Depth)
@@ -186,22 +177,20 @@ def parseData(self):
         Star_d = comp.Star_density(Depth, imp_b, sintt, Period)
         M_star = comp.Star_mass(R_s, Star_d)
         M_planet = comp.Planet_mass(M_star, Period, Semi_a)
-
-        # Update Label
-        #planet = "Planet radius : {0:.5E} {1} \nPlanet mass : {2:.3E} {3}".format((R_p*l), self.str_conv[0], (M_planet*m), self.str_conv[1])
-        star = "Star density : {0:.5E} kg/m3 \nStar mass : {1:.3E} {2}".format(Star_d, (M_star*m), self.str_conv[1])
-        other = "Impact parameter b : {0:.5E} \nSemi-major a : {1:.5E} {2} \nInclinaison : {3:.3f} {4}".format(imp_b, (Semi_a*l), self.str_conv[0], (alpha*a), self.str_conv[3])
-        lightcurve = "Depth : {0:.3f} \nTotal duration : {1:.3E} {2} \nFull Duration : {3:.3E} {4}".format(Depth, (Tot*t), self.str_conv[2], (full*t), self.str_conv[2])
-
+        
         self.labelRadius.setText("Enter the Star's radius (%s):"% self.str_conv[0])
         self.labelPeriod.setText("Enter the Period of orbit (%s):"% self.str_conv[2])
 
-        self.PRadiusValue.setText(str(R_p*l))
-        self.PMassValue.setText(str(M_planet*m))
-
-        self.StarLabel.setText(star)
-        self.Other.setText(other)
-        self.LC.setText(lightcurve)
+        self.PRadius.value = R_p
+        self.PMass.value = M_planet
+        self.SDensity = Star_d
+        self.SMass = M_planet
+        self.ImpParameter.value = imp_b
+        self.SMA.value = Semi_a
+        self.inc.value = alpha
+        self.depth.value = Depth
+        self.TotalDuration.value = Tot
+        self.FullDuration.value = full
 
         self.labelInfosK.setText('Change the K coefficient : %i  (note: coeff was calculated to be optimal)' % self.sk.value())
         self.labelInfosS.setText('Change the s coefficient : %i' % self.ss.value())
