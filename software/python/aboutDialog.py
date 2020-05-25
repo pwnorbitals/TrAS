@@ -12,7 +12,7 @@ class AboutDialog(QDialog):
         self.buttonBox.accepted.connect(self.accept)
         self.buttonBox.rejected.connect(self.reject)
 
-        self.label = QLabel("Built by Chris de CLAVERIE, Magdalena CALKA and William BOITIER!\n\nIPSA CIRI Exoplanet Transits 2020")
+        self.label = QLabel("Built by Chris de CLAVERIE, Magdalena CALKA and William BOITIER!\n\nIPSA CIRI Exoplanet Transits 2020\n\n\nPublished under the GPL licence")
 
         self.layout = QVBoxLayout()
         self.layout.addWidget(self.label)

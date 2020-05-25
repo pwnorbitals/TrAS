@@ -19,7 +19,6 @@ from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as Navigatio
 
 # Local files
 import aboutDialog
-import settingsDialog
 import canvas
 import parseData
 import groupResult
