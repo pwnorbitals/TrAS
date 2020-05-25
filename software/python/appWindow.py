@@ -125,7 +125,7 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         self.close()
 
     def RadiusChanged(self):
-        self.SRadius._value = float(self.RS_input.text())
+        self.SRadius.value = float(self.RS_input.text())
         self.compute_figures()
 
     def PeriodChanged(self):

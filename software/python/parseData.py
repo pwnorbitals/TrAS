@@ -166,8 +166,8 @@ def parseData(self):
         self.dataCanvas.fig.canvas.flush_events()
 
 
-        R_s = self.SRadius._value
-        Period = self.PPeriod._value
+        R_s = self.SRadius.value
+        Period = self.PPeriod.value
 
         Depth, sintt, sintf, Tot, full, midtime = comp.Param(R_s, Period, timestamps, boundaries, mag)
         imp_b = comp.Impact_parameter(sintt, sintf, Depth)
@@ -180,8 +180,8 @@ def parseData(self):
         
         self.PRadius.value = R_p
         self.PMass.value = M_planet
-        self.SDensity = Star_d
-        self.SMass = M_planet
+        self.SDensity.value = Star_d
+        self.SMass.value = M_star
         self.ImpParameter.value = imp_b
         self.SMA.value = Semi_a
         self.inc.value = alpha

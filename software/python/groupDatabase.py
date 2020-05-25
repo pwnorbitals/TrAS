@@ -73,8 +73,8 @@ def doResearch(self):
 def importSelection(self):
     index = self.MenuD.currentIndex()
     entry = self.results[index]
-    self.SRadius._value = entry.get('star_radius') * 695700
-    self.PPeriod._value = entry.get('period') * (60*60*24)
+    self.SRadius.value = entry.get('star_radius') * 695700
+    self.PPeriod.value = entry.get('period') * (60*60*24)
     self.SRadius._combo.setCurrentIndex(self.SRadius._combo.findText('Rs'))
     self.PPeriod._combo.setCurrentIndex(self.PPeriod._combo.findText('day'))
     print(entry.get('star_radius'), entry.get('period'))
